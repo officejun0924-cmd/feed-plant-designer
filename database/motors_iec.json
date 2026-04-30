@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "standard": "IEC 60034 / KS C IEC 60034",
+  "voltage": "400V/50Hz 3-phase",
+  "motors": [
+    {"model": "IE3-63M-4",   "rated_kW": 0.18,  "rated_rpm": 1380, "poles": 4, "frame": "63M",  "efficiency_pct": 63.0, "efficiency_class": "IE3", "power_factor": 0.70, "current_A_400V": 0.6,  "torque_Nm": 1.2,   "shaft_dia_mm": 11},
+    {"model": "IE3-71M-4",   "rated_kW": 0.25,  "rated_rpm": 1380, "poles": 4, "frame": "71M",  "efficiency_pct": 68.0, "efficiency_class": "IE3", "power_factor": 0.72, "current_A_400V": 0.8,  "torque_Nm": 1.7,   "shaft_dia_mm": 14},
+    {"model": "IE3-71L-4",   "rated_kW": 0.37,  "rated_rpm": 1380, "poles": 4, "frame": "71L",  "efficiency_pct": 73.0, "efficiency_class": "IE3", "power_factor": 0.73, "current_A_400V": 1.1,  "torque_Nm": 2.6,   "shaft_dia_mm": 14},
+    {"model": "IE3-80M-4",   "rated_kW": 0.55,  "rated_rpm": 1400, "poles": 4, "frame": "80M",  "efficiency_pct": 77.0, "efficiency_class": "IE3", "power_factor": 0.75, "current_A_400V": 1.5,  "torque_Nm": 3.8,   "shaft_dia_mm": 19},
+    {"model": "IE3-80L-4",   "rated_kW": 0.75,  "rated_rpm": 1400, "poles": 4, "frame": "80L",  "efficiency_pct": 79.6, "efficiency_class": "IE3", "power_factor": 0.77, "current_A_400V": 1.9,  "torque_Nm": 5.1,   "shaft_dia_mm": 19},
+    {"model": "IE3-90S-4",   "rated_kW": 1.1,   "rated_rpm": 1420, "poles": 4, "frame": "90S",  "efficiency_pct": 81.4, "efficiency_class": "IE3", "power_factor": 0.79, "current_A_400V": 2.8,  "torque_Nm": 7.4,   "shaft_dia_mm": 24},
+    {"model": "IE3-90L-4",   "rated_kW": 1.5,   "rated_rpm": 1440, "poles": 4, "frame": "90L",  "efficiency_pct": 82.8, "efficiency_class": "IE3", "power_factor": 0.81, "current_A_400V": 3.6,  "torque_Nm": 9.9,   "shaft_dia_mm": 24},
+    {"model": "IE3-100L-4",  "rated_kW": 2.2,   "rated_rpm": 1440, "poles": 4, "frame": "100L", "efficiency_pct": 84.3, "efficiency_class": "IE3", "power_factor": 0.81, "current_A_400V": 5.2,  "torque_Nm": 14.6,  "shaft_dia_mm": 28},
+    {"model": "IE3-100LB-4", "rated_kW": 3.0,   "rated_rpm": 1450, "poles": 4, "frame": "100LB","efficiency_pct": 85.5, "efficiency_class": "IE3", "power_factor": 0.82, "current_A_400V": 6.9,  "torque_Nm": 19.8,  "shaft_dia_mm": 28},
+    {"model": "IE3-112M-4",  "rated_kW": 4.0,   "rated_rpm": 1450, "poles": 4, "frame": "112M", "efficiency_pct": 86.6, "efficiency_class": "IE3", "power_factor": 0.82, "current_A_400V": 9.0,  "torque_Nm": 26.4,  "shaft_dia_mm": 28},
+    {"model": "IE3-132S-4",  "rated_kW": 5.5,   "rated_rpm": 1450, "poles": 4, "frame": "132S", "efficiency_pct": 87.7, "efficiency_class": "IE3", "power_factor": 0.83, "current_A_400V": 12.1, "torque_Nm": 36.2,  "shaft_dia_mm": 38},
+    {"model": "IE3-132M-4",  "rated_kW": 7.5,   "rated_rpm": 1450, "poles": 4, "frame": "132M", "efficiency_pct": 88.7, "efficiency_class": "IE3", "power_factor": 0.84, "current_A_400V": 16.3, "torque_Nm": 49.4,  "shaft_dia_mm": 38},
+    {"model": "IE3-160M-4",  "rated_kW": 11.0,  "rated_rpm": 1460, "poles": 4, "frame": "160M", "efficiency_pct": 89.8, "efficiency_class": "IE3", "power_factor": 0.84, "current_A_400V": 23.7, "torque_Nm": 71.9,  "shaft_dia_mm": 42},
+    {"model": "IE3-160L-4",  "rated_kW": 15.0,  "rated_rpm": 1460, "poles": 4, "frame": "160L", "efficiency_pct": 90.6, "efficiency_class": "IE3", "power_factor": 0.85, "current_A_400V": 31.7, "torque_Nm": 98.1,  "shaft_dia_mm": 42},
+    {"model": "IE3-180M-4",  "rated_kW": 18.5,  "rated_rpm": 1465, "poles": 4, "frame": "180M", "efficiency_pct": 91.2, "efficiency_class": "IE3", "power_factor": 0.86, "current_A_400V": 38.2, "torque_Nm": 120.5, "shaft_dia_mm": 48},
+    {"model": "IE3-180L-4",  "rated_kW": 22.0,  "rated_rpm": 1465, "poles": 4, "frame": "180L", "efficiency_pct": 91.6, "efficiency_class": "IE3", "power_factor": 0.86, "current_A_400V": 44.9, "torque_Nm": 143.4, "shaft_dia_mm": 48},
+    {"model": "IE3-200L-4",  "rated_kW": 30.0,  "rated_rpm": 1470, "poles": 4, "frame": "200L", "efficiency_pct": 92.3, "efficiency_class": "IE3", "power_factor": 0.86, "current_A_400V": 60.5, "torque_Nm": 194.9, "shaft_dia_mm": 55},
+    {"model": "IE3-225S-4",  "rated_kW": 37.0,  "rated_rpm": 1470, "poles": 4, "frame": "225S", "efficiency_pct": 92.7, "efficiency_class": "IE3", "power_factor": 0.87, "current_A_400V": 74.4, "torque_Nm": 240.2, "shaft_dia_mm": 60},
+    {"model": "IE3-225M-4",  "rated_kW": 45.0,  "rated_rpm": 1475, "poles": 4, "frame": "225M", "efficiency_pct": 93.1, "efficiency_class": "IE3", "power_factor": 0.87, "current_A_400V": 89.8, "torque_Nm": 291.4, "shaft_dia_mm": 60},
+    {"model": "IE3-250M-4",  "rated_kW": 55.0,  "rated_rpm": 1475, "poles": 4, "frame": "250M", "efficiency_pct": 93.5, "efficiency_class": "IE3", "power_factor": 0.87, "current_A_400V": 109.3,"torque_Nm": 356.1, "shaft_dia_mm": 65},
+    {"model": "IE3-280S-4",  "rated_kW": 75.0,  "rated_rpm": 1480, "poles": 4, "frame": "280S", "efficiency_pct": 94.0, "efficiency_class": "IE3", "power_factor": 0.88, "current_A_400V": 148.0,"torque_Nm": 484.1, "shaft_dia_mm": 75},
+    {"model": "IE3-280M-4",  "rated_kW": 90.0,  "rated_rpm": 1480, "poles": 4, "frame": "280M", "efficiency_pct": 94.2, "efficiency_class": "IE3", "power_factor": 0.88, "current_A_400V": 177.0,"torque_Nm": 580.9, "shaft_dia_mm": 75},
+    {"model": "IE3-315S-4",  "rated_kW": 110.0, "rated_rpm": 1485, "poles": 4, "frame": "315S", "efficiency_pct": 94.5, "efficiency_class": "IE3", "power_factor": 0.88, "current_A_400V": 215.0,"torque_Nm": 707.0, "shaft_dia_mm": 80},
+    {"model": "IE3-315M-4",  "rated_kW": 132.0, "rated_rpm": 1485, "poles": 4, "frame": "315M", "efficiency_pct": 94.7, "efficiency_class": "IE3", "power_factor": 0.89, "current_A_400V": 258.0,"torque_Nm": 848.5, "shaft_dia_mm": 80},
+    {"model": "IE3-315L-4",  "rated_kW": 160.0, "rated_rpm": 1485, "poles": 4, "frame": "315L", "efficiency_pct": 94.9, "efficiency_class": "IE3", "power_factor": 0.89, "current_A_400V": 311.0,"torque_Nm": 1028.6,"shaft_dia_mm": 80},
+    {"model": "IE3-355M-4",  "rated_kW": 200.0, "rated_rpm": 1488, "poles": 4, "frame": "355M", "efficiency_pct": 95.1, "efficiency_class": "IE3", "power_factor": 0.89, "current_A_400V": 387.0,"torque_Nm": 1283.3,"shaft_dia_mm": 100}
+  ]
+}

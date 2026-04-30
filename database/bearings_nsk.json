@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "manufacturer": "NSK",
+  "standard": "ISO 281",
+  "bearings": [
+    {"bearing_number": "6004",   "type": "deep_groove_ball", "bore_mm": 20,  "outer_dia_mm": 42,  "width_mm": 12, "C_kN": 9.55,  "C0_kN": 4.75, "Pu_kN": 0.20, "speed_limit_grease_rpm": 22000, "e_factor": 0.26, "X_factor": 0.56, "Y_factor": 1.71, "mass_kg": 0.050},
+    {"bearing_number": "6006",   "type": "deep_groove_ball", "bore_mm": 30,  "outer_dia_mm": 55,  "width_mm": 13, "C_kN": 13.2,  "C0_kN": 7.65, "Pu_kN": 0.33, "speed_limit_grease_rpm": 18000, "e_factor": 0.26, "X_factor": 0.56, "Y_factor": 1.71, "mass_kg": 0.098},
+    {"bearing_number": "6008",   "type": "deep_groove_ball", "bore_mm": 40,  "outer_dia_mm": 68,  "width_mm": 15, "C_kN": 16.8,  "C0_kN": 10.5, "Pu_kN": 0.46, "speed_limit_grease_rpm": 15000, "e_factor": 0.27, "X_factor": 0.56, "Y_factor": 1.63, "mass_kg": 0.160},
+    {"bearing_number": "6010",   "type": "deep_groove_ball", "bore_mm": 50,  "outer_dia_mm": 80,  "width_mm": 16, "C_kN": 21.8,  "C0_kN": 13.8, "Pu_kN": 0.60, "speed_limit_grease_rpm": 12000, "e_factor": 0.26, "X_factor": 0.56, "Y_factor": 1.71, "mass_kg": 0.225},
+    {"bearing_number": "6206",   "type": "deep_groove_ball", "bore_mm": 30,  "outer_dia_mm": 62,  "width_mm": 16, "C_kN": 19.5,  "C0_kN": 10.8, "Pu_kN": 0.46, "speed_limit_grease_rpm": 15000, "e_factor": 0.26, "X_factor": 0.56, "Y_factor": 1.71, "mass_kg": 0.128},
+    {"bearing_number": "6208",   "type": "deep_groove_ball", "bore_mm": 40,  "outer_dia_mm": 80,  "width_mm": 18, "C_kN": 29.0,  "C0_kN": 17.5, "Pu_kN": 0.75, "speed_limit_grease_rpm": 11000, "e_factor": 0.26, "X_factor": 0.56, "Y_factor": 1.71, "mass_kg": 0.255},
+    {"bearing_number": "6210",   "type": "deep_groove_ball", "bore_mm": 50,  "outer_dia_mm": 90,  "width_mm": 20, "C_kN": 35.1,  "C0_kN": 20.5, "Pu_kN": 0.90, "speed_limit_grease_rpm": 9000,  "e_factor": 0.26, "X_factor": 0.56, "Y_factor": 1.71, "mass_kg": 0.355},
+    {"bearing_number": "6212",   "type": "deep_groove_ball", "bore_mm": 60,  "outer_dia_mm": 110, "width_mm": 22, "C_kN": 52.7,  "C0_kN": 31.5, "Pu_kN": 1.36, "speed_limit_grease_rpm": 7500,  "e_factor": 0.25, "X_factor": 0.56, "Y_factor": 1.80, "mass_kg": 0.635},
+    {"bearing_number": "6214",   "type": "deep_groove_ball", "bore_mm": 70,  "outer_dia_mm": 125, "width_mm": 24, "C_kN": 62.4,  "C0_kN": 38.5, "Pu_kN": 1.65, "speed_limit_grease_rpm": 6700,  "e_factor": 0.26, "X_factor": 0.56, "Y_factor": 1.71, "mass_kg": 0.930},
+    {"bearing_number": "6216",   "type": "deep_groove_ball", "bore_mm": 80,  "outer_dia_mm": 140, "width_mm": 26, "C_kN": 71.5,  "C0_kN": 45.0, "Pu_kN": 1.93, "speed_limit_grease_rpm": 6000,  "e_factor": 0.25, "X_factor": 0.56, "Y_factor": 1.80, "mass_kg": 1.280},
+    {"bearing_number": "6218",   "type": "deep_groove_ball", "bore_mm": 90,  "outer_dia_mm": 160, "width_mm": 30, "C_kN": 95.6,  "C0_kN": 60.0, "Pu_kN": 2.55, "speed_limit_grease_rpm": 5300,  "e_factor": 0.25, "X_factor": 0.56, "Y_factor": 1.80, "mass_kg": 2.080},
+    {"bearing_number": "6220",   "type": "deep_groove_ball", "bore_mm": 100, "outer_dia_mm": 180, "width_mm": 34, "C_kN": 122.0, "C0_kN": 76.5, "Pu_kN": 3.25, "speed_limit_grease_rpm": 4800,  "e_factor": 0.24, "X_factor": 0.56, "Y_factor": 1.87, "mass_kg": 3.480},
+    {"bearing_number": "22208CKE","type": "spherical_roller","bore_mm": 40,  "outer_dia_mm": 80,  "width_mm": 23, "C_kN": 54.5,  "C0_kN": 53.0, "Pu_kN": 2.35, "speed_limit_grease_rpm": 7500,  "e_factor": 0.37, "X_factor": 0.67, "Y_factor": 1.65, "mass_kg": 0.435},
+    {"bearing_number": "22210CKE","type": "spherical_roller","bore_mm": 50,  "outer_dia_mm": 90,  "width_mm": 23, "C_kN": 67.5,  "C0_kN": 66.5, "Pu_kN": 2.95, "speed_limit_grease_rpm": 6300,  "e_factor": 0.36, "X_factor": 0.67, "Y_factor": 1.70, "mass_kg": 0.555},
+    {"bearing_number": "22212CKE","type": "spherical_roller","bore_mm": 60,  "outer_dia_mm": 110, "width_mm": 28, "C_kN": 100.0, "C0_kN": 99.5, "Pu_kN": 4.40, "speed_limit_grease_rpm": 5300,  "e_factor": 0.36, "X_factor": 0.67, "Y_factor": 1.70, "mass_kg": 0.970},
+    {"bearing_number": "22215CKE","type": "spherical_roller","bore_mm": 75,  "outer_dia_mm": 130, "width_mm": 31, "C_kN": 130.0, "C0_kN": 130.0,"Pu_kN": 5.70, "speed_limit_grease_rpm": 4500,  "e_factor": 0.36, "X_factor": 0.67, "Y_factor": 1.70, "mass_kg": 1.620},
+    {"bearing_number": "NU206EW", "type": "cylindrical_roller","bore_mm": 30, "outer_dia_mm": 62,  "width_mm": 16, "C_kN": 29.5,  "C0_kN": 26.5, "Pu_kN": 1.30, "speed_limit_grease_rpm": 12000, "e_factor": 0.30, "X_factor": 1.00, "Y_factor": 0.00, "mass_kg": 0.170},
+    {"bearing_number": "NU210EW", "type": "cylindrical_roller","bore_mm": 50, "outer_dia_mm": 90,  "width_mm": 20, "C_kN": 61.0,  "C0_kN": 56.0, "Pu_kN": 2.80, "speed_limit_grease_rpm": 7500,  "e_factor": 0.30, "X_factor": 1.00, "Y_factor": 0.00, "mass_kg": 0.460},
+    {"bearing_number": "NU212EW", "type": "cylindrical_roller","bore_mm": 60, "outer_dia_mm": 110, "width_mm": 22, "C_kN": 84.0,  "C0_kN": 80.0, "Pu_kN": 4.05, "speed_limit_grease_rpm": 6300,  "e_factor": 0.30, "X_factor": 1.00, "Y_factor": 0.00, "mass_kg": 0.800}
+  ]
+}
