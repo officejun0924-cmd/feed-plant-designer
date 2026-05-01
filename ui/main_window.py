@@ -15,6 +15,13 @@ from ui.widgets.bucket_elevator_widget import BucketElevatorWidget
 from ui.widgets.mixer_pelletizer_widget import MixerPelletizerWidget
 from ui.widgets.grinder_hammer_mill_widget import GrinderHammerMillWidget
 from ui.widgets.fan_blower_widget import FanBlowerWidget
+from ui.widgets.belt_conveyor_widget import BeltConveyorWidget
+from ui.widgets.flow_conveyor_widget import FlowConveyorWidget
+from ui.widgets.drag_conveyor_widget import DragConveyorWidget
+from ui.widgets.bag_filter_widget import BagFilterWidget
+from ui.widgets.cyclone_widget import CycloneWidget
+from ui.widgets.rotary_valve_widget import RotaryValveWidget
+from ui.widgets.sieve_widget import SieveWidget
 
 
 class MainWindow(QMainWindow):
@@ -84,18 +91,32 @@ class MainWindow(QMainWindow):
         self._tabs = QTabWidget()
         self._tabs.setDocumentMode(True)
 
-        self._w_screw   = ScrewConveyorWidget()
-        self._w_bucket  = BucketElevatorWidget()
-        self._w_mixer   = MixerPelletizerWidget()
-        self._w_grinder = GrinderHammerMillWidget()
-        self._w_fan     = FanBlowerWidget()
+        self._w_screw        = ScrewConveyorWidget()
+        self._w_bucket       = BucketElevatorWidget()
+        self._w_mixer        = MixerPelletizerWidget()
+        self._w_grinder      = GrinderHammerMillWidget()
+        self._w_fan          = FanBlowerWidget()
+        self._w_belt         = BeltConveyorWidget()
+        self._w_flow         = FlowConveyorWidget()
+        self._w_drag         = DragConveyorWidget()
+        self._w_bag_filter   = BagFilterWidget()
+        self._w_cyclone      = CycloneWidget()
+        self._w_rotary_valve = RotaryValveWidget()
+        self._w_sieve        = SieveWidget()
 
         for w, label in [
-            (self._w_screw,   "스크류 컨베이어"),
-            (self._w_bucket,  "버킷 엘리베이터"),
-            (self._w_mixer,   "믹서/펠레타이저"),
-            (self._w_grinder, "분쇄기/해머밀"),
-            (self._w_fan,     "팬/블로어"),
+            (self._w_screw,        "스크류 컨베이어"),
+            (self._w_bucket,       "버킷 엘리베이터"),
+            (self._w_belt,         "벨트 컨베이어"),
+            (self._w_flow,         "플로우 컨베이어"),
+            (self._w_drag,         "드래그 컨베이어"),
+            (self._w_mixer,        "믹서/펠레타이저"),
+            (self._w_grinder,      "분쇄기/해머밀"),
+            (self._w_fan,          "팬/블로어"),
+            (self._w_bag_filter,   "백 필터"),
+            (self._w_cyclone,      "사이클론"),
+            (self._w_rotary_valve, "로터리 밸브"),
+            (self._w_sieve,        "체 (Sieve)"),
         ]:
             self._tabs.addTab(w, label)
             w.calculation_done.connect(self._on_result)
@@ -160,9 +181,10 @@ class MainWindow(QMainWindow):
             self, f"{APP_NAME}",
             f"<b>{APP_NAME}</b><br>"
             f"버전: {APP_VERSION}<br><br>"
-            "KS/ISO 기준 설계 공식 + SKF·NSK·FAG DB<br>"
-            "대상: 스크류 컨베이어, 버킷 엘리베이터,<br>"
-            "믹서/펠레타이저, 해머밀, 팬/블로어<br><br>"
+            "KS/ISO 기준 설계 공식 + SKF·NSK·FAG DB<br><br>"
+            "<b>컨베이어:</b> 스크류·벨트·플로우·드래그 컨베이어, 버킷 엘리베이터<br>"
+            "<b>분리/집진:</b> 백 필터, 사이클론, 체(Sieve), 로터리 밸브<br>"
+            "<b>혼합/분쇄:</b> 믹서/펠레타이저, 해머밀, 팬/블로어<br><br>"
             "계산 항목: 모터 용량, 베어링 수명 (ISO 281),<br>"
             "샤프트 설계 (ASME), V벨트 선정 (KS B 1400)"
         )

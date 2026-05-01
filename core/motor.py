@@ -2,6 +2,8 @@ import math
 from models.input_models import (
     ScrewConveyorInput, BucketElevatorInput, MixerPelletizerInput,
     GrinderHammerMillInput, FanBlowerInput,
+    BeltConveyorInput, FlowConveyorInput, DragConveyorInput,
+    BagFilterInput, CycloneInput, RotaryValveInput, SieveInput,
 )
 from models.result_models import MotorResult
 from app.config import IEC_MOTOR_SERIES
@@ -54,6 +56,103 @@ class MotorCalculator:
         Q_m3s = inp.flow_rate_m3h / 3600.0
         P = (Q_m3s * inp.static_pressure_pa) / (inp.fan_efficiency * inp.drive_efficiency * 1000.0)
         return P * inp.safety_factor
+
+    # ── 추가 장비 계산 (2026.05 핸드북 기반) ─────────────────────────────
+
+    def calc_belt_conveyor_power(self, inp: BeltConveyorInput) -> float:
+        """핸드북 4장: P = P1 + P2 + P3   Pm = P / η
+        P1 = 0.06 × f × W × v × (l+l0) / 367   [무부하 동력, kW]
+        P2 = f × Qt × (l+l0) / 367              [수평부하 동력, kW]
+        P3 = ±h × Qt / 367                       [수직부하 동력, kW]
+        """
+        theta = math.radians(inp.inclination_deg)
+        l_h = inp.conveyor_length_m * math.cos(theta)   # 수평 거리 (m)
+        h   = inp.conveyor_length_m * math.sin(theta)   # 수직 높이 (m)
+        eff_len = l_h + inp.correction_length_l0
+
+        P1 = 0.06 * inp.roller_friction_f * inp.moving_parts_W * inp.belt_speed_mpm * eff_len / 367.0
+        P2 = inp.roller_friction_f * inp.capacity_tph * eff_len / 367.0
+        P3 = h * inp.capacity_tph / 367.0  # 하향 경사는 음수지만 안전을 위해 절댓값
+        P  = P1 + P2 + P3
+        Pm = P / inp.drive_efficiency
+        return Pm * inp.safety_factor
+
+    def calc_flow_conveyor_power(self, inp: FlowConveyorInput) -> float:
+        """핸드북 3장: H [HP] = E × L × Qt / 367
+        경사 포함: L → 수평거리 L, H_height 추가
+        """
+        theta = math.radians(inp.inclination_deg)
+        l_h = inp.conveyor_length_m * math.cos(theta)
+        h   = inp.conveyor_length_m * math.sin(theta) + inp.height_m
+
+        H_HP = (inp.E_constant * l_h * inp.capacity_tph / 367.0
+                + h * inp.capacity_tph / 367.0)
+        # 1 HP = 0.7457 kW
+        P_kW = H_HP * 0.7457 / inp.drive_efficiency
+        return P_kW * inp.safety_factor
+
+    def calc_drag_conveyor_power(self, inp: DragConveyorInput) -> float:
+        """핸드북 4장:
+        수평: H = Qt × F × L × (1.2 + 0.3N) / (300 × E)
+        경사: H = Qt × (1.2 + 0.3N) × (F×L + H) / (300 × E)  [HP]
+        """
+        N_coef = 1.2 + 0.3 * inp.num_outlets
+        L = inp.conveyor_length_m
+        H_h = inp.conveyor_height_m
+        E = inp.mechanical_efficiency
+        F = inp.friction_factor_F
+        Qt = inp.capacity_tph
+
+        if H_h > 0:
+            H_HP = Qt * N_coef * (F * L + H_h) / (300.0 * E)
+        else:
+            H_HP = Qt * F * L * N_coef / (300.0 * E)
+
+        P_kW = H_HP * 0.7457 / inp.drive_efficiency
+        return P_kW * inp.safety_factor
+
+    def calc_bag_filter_fan_power(self, inp: BagFilterInput) -> float:
+        """Bag Filter 시스템 Fan 동력 계산 (기존 Fan 공식 활용)
+        Pm = (Q [m³/s] × ΔP [Pa]) / (η_fan × η_drive × 1000)
+        """
+        Q_m3s = inp.air_volume_m3min / 60.0
+        P = (Q_m3s * inp.static_pressure_pa) / (inp.fan_efficiency * inp.drive_efficiency * 1000.0)
+        return P * inp.safety_factor
+
+    def calc_cyclone_fan_power(self, inp: CycloneInput) -> float:
+        """Cyclone 시스템 Fan 동력 계산
+        ΔP [mmH2O] = λ × Va² / (2g) × γ × 10³
+        ΔP [Pa]    = ΔP [mmH2O] × 9.81
+        """
+        g = 9.8
+        gamma_kgm3 = 1.2  # 공기 밀도 kg/m³
+        dP_mmH2O = inp.pressure_loss_coef * (inp.inlet_velocity_msec ** 2) / (2 * g) * gamma_kgm3
+        dP_Pa = dP_mmH2O * 9.81
+        Q_m3s = inp.air_volume_m3min / 60.0
+        P = (Q_m3s * dP_Pa) / (inp.fan_efficiency * inp.drive_efficiency * 1000.0)
+        return P * inp.safety_factor
+
+    def calc_rotary_valve_power(self, inp: RotaryValveInput) -> float:
+        """Rotary Valve 구동 동력 — 경험식 근사
+        로터 직경·길이·회전수 기반 토크 추정 후 모터 동력 산출
+        T ≈ 0.05 × D² × L × γ × N [N·m] (실무 경험식)
+        P = T × N_rps × 2π / 1000  [kW]
+        """
+        D_m = inp.rotor_diameter_mm / 1000.0
+        gamma_kgm3 = inp.material_density * 1000.0  # t/m³ → kg/m³
+        # 토크 근사: 재료 저항 + 공기 누설 저항
+        T_Nm = 0.06 * (D_m ** 2) * inp.rotor_length_m * gamma_kgm3 * inp.rotation_speed_rpm / 10.0
+        T_Nm = max(T_Nm, 2.0)  # 최소 토크
+        n_rps = inp.rotation_speed_rpm / 60.0
+        P_kW = T_Nm * n_rps * 2 * math.pi / (1000.0 * inp.drive_efficiency)
+        return max(P_kW * inp.safety_factor, 0.37)  # 최소 0.37 kW
+
+    def calc_sieve_power(self, inp: SieveInput) -> float:
+        """Sieve(체) 진동 모터 동력 — 실무 경험식
+        P ≈ 0.75 kW/m² × 체 면적 (사료용 진동체 기준)
+        """
+        P_kW = 0.75 * inp.sieve_area_m2 / inp.drive_efficiency
+        return P_kW * inp.safety_factor
 
     def select_standard_motor(self, required_kW: float) -> MotorResult:
         """IEC 표준 용량 계열에서 필요 동력 이상 최소 용량 선정 후 DB 조회"""
