@@ -60,20 +60,52 @@ class MotorCalculator:
 
     # ── 추가 장비 계산 (2026.05 핸드북 기반) ─────────────────────────────
 
+    # 표 1-9: (f, l0) — Roller 조건별
+    _BELT_F_TABLE = {
+        "보통": (0.03,  49.0),
+        "양호": (0.022, 66.0),
+        "내림": (0.012, 156.0),
+    }
+
+    # 표 1-10: Belt 폭(mm) → W(kg/m) 운동부 중량
+    _BELT_W_TABLE = {
+        400: 22.4, 450: 28.0, 500: 30.0, 600: 35.5,
+        750: 53.0, 900: 63.0, 1000: 69.0, 1050: 80.0,
+        1200: 90.0, 1400: 112.0, 1600: 125.0,
+        1800: 150.0, 2000: 160.0, 2200: 200.0,
+    }
+
+    @classmethod
+    def lookup_belt_W(cls, belt_width_mm: float) -> float:
+        """표1-10: Belt 폭 → W (kg/m) — 가장 가까운 규격으로 올림 선택"""
+        widths = sorted(cls._BELT_W_TABLE.keys())
+        for w in widths:
+            if belt_width_mm <= w:
+                return cls._BELT_W_TABLE[w]
+        return cls._BELT_W_TABLE[widths[-1]]
+
     def calc_belt_conveyor_power(self, inp: BeltConveyorInput) -> float:
-        """핸드북 4장: P = P1 + P2 + P3   Pm = P / η
+        """핸드북 Ch.1 표1-9/1-10: P = P1+P2+P3,  Pm = P/η
         P1 = 0.06 × f × W × v × (l+l0) / 367   [무부하 동력, kW]
         P2 = f × Qt × (l+l0) / 367              [수평부하 동력, kW]
         P3 = ±h × Qt / 367                       [수직부하 동력, kW]
+        f, l0: 표1-9 roller_condition 기준 자동조회
+        W:     표1-10 belt_width_mm 기준 자동조회 (auto_W=True)
         """
+        # 표1-9 자동조회
+        f, l0 = self._BELT_F_TABLE.get(inp.roller_condition, (0.022, 66.0))
+
+        # 표1-10 자동조회
+        W = self.lookup_belt_W(inp.belt_width_mm) if inp.auto_W else inp.moving_parts_W
+
         theta = math.radians(inp.inclination_deg)
         l_h = inp.conveyor_length_m * math.cos(theta)   # 수평 거리 (m)
         h   = inp.conveyor_length_m * math.sin(theta)   # 수직 높이 (m)
-        eff_len = l_h + inp.correction_length_l0
+        eff_len = l_h + l0
 
-        P1 = 0.06 * inp.roller_friction_f * inp.moving_parts_W * inp.belt_speed_mpm * eff_len / 367.0
-        P2 = inp.roller_friction_f * inp.capacity_tph * eff_len / 367.0
-        P3 = h * inp.capacity_tph / 367.0  # 하향 경사는 음수지만 안전을 위해 절댓값
+        P1 = 0.06 * f * W * inp.belt_speed_mpm * eff_len / 367.0
+        P2 = f * inp.capacity_tph * eff_len / 367.0
+        P3 = h * inp.capacity_tph / 367.0
         P  = P1 + P2 + P3
         Pm = P / inp.drive_efficiency
         return Pm * inp.safety_factor

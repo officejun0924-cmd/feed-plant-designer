@@ -127,15 +127,29 @@ class ChainInput:
 
 @dataclass
 class BeltConveyorInput:
-    """Belt Conveyor 소요동력 — 핸드북 4장 공식"""
+    """Belt Conveyor 소요동력 — 핸드북 Ch.1 표1-9/1-10 공식
+    P = P1+P2+P3,  Pm = P/η
+    P1 = 0.06×f×W×v×(l+l0)/367   [무부하]
+    P2 = f×Qt×(l+l0)/367          [수평부하]
+    P3 = ±h×Qt/367                 [수직부하]
+
+    표1-9 (f, l0 조합):
+      "보통"  → f=0.03,  l0=49   (회전저항 보통 Roller 사용)
+      "양호"  → f=0.022, l0=66   (회전저항 특히 작은 Roller, 설치 양호)
+      "내림"  → f=0.012, l0=156  (내림 Conveyor 제동력 계산)
+    표1-10 (W, kg/m): Belt 폭별 운동부 중량 — auto_W=True 시 자동조회
+    """
     capacity_tph: float = 80.0              # 운반량 Qt (Ton/hr)
     belt_width_mm: float = 600.0            # Belt 폭 B (mm)
     belt_speed_mpm: float = 60.0            # Belt 속도 v (m/min)
     conveyor_length_m: float = 20.0         # 수평 길이 l (m)
     inclination_deg: float = 0.0            # 경사각 (°)
-    roller_friction_f: float = 0.022        # Roller 회전 마찰계수 f (표1-9)
-    moving_parts_W: float = 35.5            # 운반물 이외 운동부 중량 W (kg/m, 표1-10)
-    correction_length_l0: float = 66.0      # 기장의 보정길이 l0 (m, 표1-9)
+    material_density: float = 0.65          # 재료 겉보기 비중 ρ (t/m³)
+    # 표1-9 선택: "보통" | "양호" | "내림"
+    roller_condition: str = "양호"
+    # W 자동조회 여부 (True = 표1-10 belt_width_mm 기준 자동, False = manual)
+    auto_W: bool = True
+    moving_parts_W: float = 35.5            # auto_W=False 일 때만 사용 (kg/m)
     drive_efficiency: float = 0.85
     safety_factor: float = 1.25
 

@@ -38,8 +38,12 @@ def calculate(inp: DragConveyorInput,
     if inp.capacity_tph > 200:
         notes.append("⚠ 처리량 200 T/hr 초과 — Chain 선정 재검토 필요")
 
-    notes.append(f"ℹ F={inp.friction_factor_F}, N(배출구)={inp.num_outlets}, "
+    # P.81: 운반물 1m당 중량 W = 16.7 × Qt / V  (참고용)
+    chain_v = _CHAIN_SPEED_MPM
+    W_per_m = 16.7 * inp.capacity_tph / max(chain_v, 1)
+    notes.append(f"■ 핸드북 공식: F={inp.friction_factor_F}, N(배출구)={inp.num_outlets}, "
                  f"E={inp.mechanical_efficiency} → {P_kW:.2f} kW")
+    notes.append(f"■ 운반물 1m당 중량 W = {W_per_m:.1f} kg/m  (V={chain_v} m/min 기준)")
 
     motor_result = motor_calc.select_standard_motor(P_kW)
 

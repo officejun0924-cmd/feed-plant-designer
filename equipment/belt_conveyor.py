@@ -1,6 +1,10 @@
 """Belt Conveyor 통합 계산기
-핸드북 Chapter 1 공식:
-  P = P1 + P2 + P3,  Pm = P / η
+핸드북 Ch.1 표1-9/1-10 공식:
+  P = P1+P2+P3,  Pm = P/η
+  운반량: Qt = 60×k×(0.9B-0.05)²×v×ρ×γ  (표1-5/1-7)
+
+표1-9 (f, l0): roller_condition 콤보 → 자동조회
+표1-10 (W):   belt_width_mm → 자동조회 (auto_W=True)
 """
 import math
 from models.input_models import BeltConveyorInput, BearingInput, ShaftInput, ReducerInput, ChainInput
@@ -10,6 +14,33 @@ from core.bearing import BearingCalculator
 from core.shaft import ShaftDesigner
 from core.reducer import ReducerSelector, ChainSelector
 from app.config import DIRECT_COUPLING_BRANDS
+
+# 표1-5: Trough 35°, 동안식각별 k값 (대표값)
+# 동안식각 10°=0.1023, 20°=0.1488, 30°=0.1849 (Trough 35° 기준)
+_K_ANGLE = {10: 0.1023, 20: 0.1488, 30: 0.1849}
+
+# 표1-7: 경사각도별 운반율 γ
+_SLOPE_FACTOR = {
+    0: 1.00, 2: 1.00, 4: 0.99, 6: 0.98, 8: 0.97,
+    10: 0.95, 12: 0.93, 14: 0.91, 16: 0.89, 18: 0.85,
+    20: 0.81, 22: 0.76, 24: 0.73, 26: 0.71, 28: 0.64,
+    30: 0.59,
+}
+
+
+def _slope_factor(deg: float) -> float:
+    """표1-7 경사각도 → 운반율 γ (선형 보간)"""
+    angles = sorted(_SLOPE_FACTOR.keys())
+    if deg <= angles[0]:
+        return _SLOPE_FACTOR[angles[0]]
+    if deg >= angles[-1]:
+        return _SLOPE_FACTOR[angles[-1]]
+    for i in range(len(angles) - 1):
+        a0, a1 = angles[i], angles[i + 1]
+        if a0 <= deg <= a1:
+            t = (deg - a0) / (a1 - a0)
+            return _SLOPE_FACTOR[a0] + t * (_SLOPE_FACTOR[a1] - _SLOPE_FACTOR[a0])
+    return 1.0
 
 
 def calculate(inp: BeltConveyorInput,
@@ -25,26 +56,38 @@ def calculate(inp: BeltConveyorInput,
     reducer_sel  = ReducerSelector()
     chain_sel    = ChainSelector()
 
+    # ── 표1-9 자동조회 표시 ──────────────────────────────────
+    f, l0 = motor_calc._BELT_F_TABLE.get(inp.roller_condition, (0.022, 66.0))
+    W = motor_calc.lookup_belt_W(inp.belt_width_mm) if inp.auto_W else inp.moving_parts_W
+    notes.append(f"■ 표1-9 → f={f}, l0={l0} m  ({inp.roller_condition} 조건)")
+    notes.append(f"■ 표1-10 → W={W} kg/m  (Belt {inp.belt_width_mm:.0f} mm 기준{'·자동' if inp.auto_W else '·수동'})")
+
+    # ── 소요동력 계산 ────────────────────────────────────────
     P_kW = motor_calc.calc_belt_conveyor_power(inp)
 
-    # 운반 용량 검토 (Qt ≤ 200 T/hr)
-    if inp.capacity_tph > 200:
-        notes.append("⚠ 운반량 200 Ton/hr 초과 — Belt Conveyor 상한 초과")
+    # ── 이론 운반량 검토 (표1-5/1-7, P.25 공식) ──────────────
+    # Qt = 60×k×(0.9B-0.05)²×v×ρ×γ
+    B_m      = inp.belt_width_mm / 1000.0
+    k_val    = _K_ANGLE.get(20, 0.1488)          # Trough 35°, 동안식각 20° 대표값
+    gamma_v  = _slope_factor(inp.inclination_deg)
+    Qt_theory = (60 * k_val * (0.9 * B_m - 0.05) ** 2
+                 * inp.belt_speed_mpm * inp.material_density * gamma_v)
+    notes.append(f"■ 이론 운반량 (Trough35°, 동안식각20°): {Qt_theory:.1f} Ton/hr")
+    notes.append(f"■ 경사 운반율 γ (표1-7, {inp.inclination_deg:.0f}°): {gamma_v:.2f}")
+
+    if Qt_theory < inp.capacity_tph:
+        notes.append(f"⚠ 이론 운반량 부족! Belt 폭 확대 또는 속도 증가 검토 (여유 {Qt_theory/inp.capacity_tph*100:.0f}%)")
+    else:
+        notes.append(f"✓ 운반량 여유율: {(Qt_theory/inp.capacity_tph - 1)*100:.0f}%")
+
     if inp.inclination_deg > 20:
-        notes.append("⚠ 경사각 20° 초과 — 재료 미끄러짐 위험, 경사각 재검토 권장")
+        notes.append("⚠ 경사각 20° 초과 — 재료 미끄러짐 위험, 경사각 재검토")
     if inp.belt_speed_mpm > 180:
         notes.append("⚠ Belt 속도 180 m/min 초과")
 
-    # 운반 용량 역산 표시
-    theta = math.radians(inp.inclination_deg)
-    B_m = inp.belt_width_mm / 1000.0
-    k_val = 0.1488   # 표1-5 Trough 35°, 동안식각 20° 기준
-    Qt_check = 60 * k_val * (0.9 * B_m - 0.05) ** 2 * inp.belt_speed_mpm * 0.65
-    notes.append(f"ℹ 이론 운반량(Trough35°, φ=0.65): {Qt_check:.1f} Ton/hr")
-
     motor_result = motor_calc.select_standard_motor(P_kW)
 
-    # Belt 구동 드럼 회전수 추정
+    # Belt 구동 드럼 회전수 추정 (드럼 직경 = belt폭/2 + 100 mm 근사)
     drum_dia_m = max(0.3, inp.belt_width_mm / 2000.0 + 0.1)
     drum_rpm = inp.belt_speed_mpm / (math.pi * drum_dia_m)
 
