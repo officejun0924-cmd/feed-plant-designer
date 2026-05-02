@@ -141,3 +141,69 @@ class BearingCalculator:
             outer_dia_mm=selected_b["outer_dia_mm"],
             width_mm=selected_b["width_mm"],
         )
+
+    def select_ucf_bearing(self, inp: BearingInput,
+                           housing_type: str = "UCF",
+                           min_bore_mm: float = 0.0) -> BearingResult:
+        """UCF/UCP/UCFC 하우징 유닛 베어링 선정 (ISO 3228 / KS B 2016).
+        UC 삽입 베어링 기반 볼 베어링이므로 p=3.
+        housing_type: "UCF" | "UCP" | "UCFC"
+        """
+        from database.db_loader import DBLoader
+
+        p = 3.0
+        rel = int(inp.reliability)
+        a1 = RELIABILITY_A1.get(rel, 1.0)
+
+        units = DBLoader.get_ucf_bearing_db()
+
+        # housing_type 코드로 필터 (e.g. "UCF" → "UCF204" 등 포함 여부)
+        filtered = [
+            u for u in units
+            if any(ht.startswith(housing_type) for ht in u.get("housing_types", []))
+            and u["bore_mm"] >= min_bore_mm
+        ]
+        if not filtered:
+            filtered = [u for u in units if u["bore_mm"] >= min_bore_mm] or list(units)
+
+        results = []
+        for u in filtered:
+            C_N = u["C_kN"] * 1000.0
+            C0_N = u["C0_kN"] * 1000.0
+            P_N = self.calc_equivalent_load(
+                inp.radial_load_N, inp.axial_load_N, C0_N, "deep_groove_ball"
+            )
+            C_req = self.calc_required_C(P_N, inp.desired_life_hr / a1, inp.shaft_speed_rpm, p)
+            if C_N >= C_req:
+                L10h = self.calc_L10_hours(C_N, P_N, inp.shaft_speed_rpm, p) * a1
+                results.append((u, P_N, C_req, C_N, L10h))
+
+        if not results:
+            u = max(filtered, key=lambda x: x["C_kN"])
+            C_N = u["C_kN"] * 1000.0
+            C0_N = u["C0_kN"] * 1000.0
+            P_N = self.calc_equivalent_load(inp.radial_load_N, inp.axial_load_N, C0_N, "deep_groove_ball")
+            C_req = self.calc_required_C(P_N, inp.desired_life_hr, inp.shaft_speed_rpm, p)
+            L10h = self.calc_L10_hours(C_N, P_N, inp.shaft_speed_rpm, p)
+            selected_u = u
+            P_N_s, C_req_s, C_N_s, L10h_s = P_N, C_req, C_N, L10h
+        else:
+            best = min(results, key=lambda r: r[0]["outer_dia_mm"])
+            selected_u, P_N_s, C_req_s, C_N_s, L10h_s = best
+
+        # 하우징 호칭 생성 (e.g. UCF + 208 → UCF208)
+        uc_num = selected_u["designation"].replace("UC", "")   # "204" etc.
+        bearing_number = f"{housing_type}{uc_num}"
+
+        return BearingResult(
+            equivalent_load_P_N=round(P_N_s, 1),
+            required_C_N=round(C_req_s, 0),
+            basic_load_rating_C_N=round(C_N_s, 0),
+            L10_hr=round(L10h_s, 0),
+            bearing_number=bearing_number,
+            bearing_type=f"UC insert ({housing_type} housing)",
+            manufacturer="NSK/SNR/NTN",
+            bore_mm=selected_u["bore_mm"],
+            outer_dia_mm=selected_u["outer_dia_mm"],
+            width_mm=selected_u["width_mm"],
+        )

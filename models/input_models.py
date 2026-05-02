@@ -13,7 +13,8 @@ class EquipmentType(Enum):
 @dataclass
 class ScrewConveyorInput:
     capacity_tph: float = 20.0
-    material_density: float = 600.0       # kg/m³
+    specific_gravity: float = 0.65        # 비중 (t/m³)
+    material_name: str = "직접 입력"      # 원재료 이름 (MATERIAL_DB 키)
     screw_diameter_m: float = 0.3         # m
     screw_pitch_m: float = 0.3            # m
     screw_speed_rpm: float = 50.0         # rpm
@@ -21,7 +22,7 @@ class ScrewConveyorInput:
     inclination_deg: float = 0.0          # °
     material_factor: float = 1.4          # Cf (사료류 ≈ 1.2~1.8)
     friction_factor: float = 0.05         # f
-    fill_ratio: float = 0.45
+    fill_efficiency: float = 0.45         # 충만효율 ψ
     drive_efficiency: float = 0.90
     safety_factor: float = 1.25
 
@@ -29,7 +30,8 @@ class ScrewConveyorInput:
 @dataclass
 class BucketElevatorInput:
     capacity_tph: float = 20.0
-    material_density: float = 600.0
+    specific_gravity: float = 0.65        # 비중 (t/m³)
+    material_name: str = "직접 입력"
     lift_height_m: float = 15.0
     bucket_volume_L: float = 5.0
     bucket_spacing_m: float = 0.5
@@ -41,7 +43,8 @@ class BucketElevatorInput:
 @dataclass
 class MixerPelletizerInput:
     capacity_tph: float = 5.0
-    material_density: float = 500.0
+    specific_gravity: float = 0.5         # 비중 (t/m³)
+    material_name: str = "직접 입력"
     mixer_diameter_m: float = 0.6
     mixer_length_m: float = 1.5
     paddle_number: int = 12
@@ -100,6 +103,7 @@ class ReducerInput:
     input_speed_rpm: float = 1450.0
     output_speed_rpm: float = 50.0
     service_factor: float = 1.5
+    brand: str = "효성"                   # 효성 | SEW | FALK
 
 
 @dataclass
@@ -109,6 +113,14 @@ class VBeltInput:
     driven_speed_rpm: float = 480.0
     center_distance_m: float = 0.5
     section: str = "auto"                    # auto | A | B | C | D
+
+
+@dataclass
+class ChainInput:
+    """RS/RF 체인 선정 입력 (KS B 1407)"""
+    chain_type: str = "RS"                   # "RS" | "RF"
+    num_teeth_small: int = 19                # 소 스프로켓 잇수 Z1
+    center_distance_m: float = 0.5           # 축간 거리 (m)
 
 
 # ── 추가 장비 (2026.05 핸드북 기반) ──────────────────────────────────────
@@ -138,8 +150,8 @@ class FlowConveyorInput:
     inclination_deg: float = 0.0            # 경사각 (°)  0=수평
     height_m: float = 0.0                   # 수직 높이 H (m, 경사 시 입력)
     chain_speed_mpm: float = 28.0           # Chain 속도 V (m/min)
-    material_density: float = 0.7           # 비중 γ (t/m³)
-    fill_ratio: float = 0.65                # 충만효율 φ
+    specific_gravity: float = 0.7            # 비중 γ (t/m³)
+    fill_efficiency: float = 0.65           # 충만효율 φ
     E_constant: float = 3.9                 # 핸드북 표3-7 상수 (사료류 ≈3.9)
     drive_efficiency: float = 0.85
     safety_factor: float = 1.2

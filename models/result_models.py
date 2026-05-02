@@ -61,6 +61,21 @@ class VBeltResult:
 
 
 @dataclass
+class ChainResult:
+    """RS/RF 체인 선정 결과 (KS B 1407)"""
+    chain_type: str = ""                    # RS | RF | 직결
+    chain_designation: str = ""            # e.g. "RS-60" 또는 "직결"
+    chain_pitch_mm: float = 0.0
+    drive_sprocket_teeth: int = 0           # Z1
+    driven_sprocket_teeth: int = 0          # Z2
+    actual_ratio: float = 0.0
+    chain_speed_mpm: float = 0.0           # m/min
+    chain_length_links: int = 0
+    sprocket_dia_drive_mm: float = 0.0
+    sprocket_dia_driven_mm: float = 0.0
+
+
+@dataclass
 class EquipmentResult:
     equipment_type: str = ""
     motor: MotorResult = field(default_factory=MotorResult)
@@ -68,5 +83,6 @@ class EquipmentResult:
     bearing_driven: BearingResult = field(default_factory=BearingResult)
     shaft: ShaftResult = field(default_factory=ShaftResult)
     reducer: ReducerResult = field(default_factory=ReducerResult)
-    vbelt: VBeltResult = field(default_factory=VBeltResult)
+    chain: ChainResult = field(default_factory=ChainResult)
+    vbelt: VBeltResult = field(default_factory=VBeltResult)   # 하위 호환 유지
     calculation_notes: list = field(default_factory=list)

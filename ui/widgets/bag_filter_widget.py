@@ -1,7 +1,8 @@
 from PyQt6.QtWidgets import QGroupBox, QFormLayout
 from ui.base_widget import BaseEquipmentWidget
 from ui.components.input_group import InputGroup, ComboGroup
-from models.input_models import BagFilterInput, BearingInput, ShaftInput, ReducerInput, VBeltInput
+from models.input_models import BagFilterInput, BearingInput, ShaftInput, ReducerInput, ChainInput
+from app.config import REDUCER_BRANDS, DIRECT_COUPLING_BRANDS
 import equipment.bag_filter as calc_module
 
 
@@ -47,14 +48,22 @@ class BagFilterWidget(BaseEquipmentWidget):
             l3.addRow(w)
         self._input_layout.addWidget(g3)
 
-        g4 = QGroupBox("감속기 / V벨트")
+        g4 = QGroupBox("감속기 / 체인")
         l4 = QFormLayout(g4)
-        self.i_r_sf  = InputGroup("서비스계수",     "",  1.0, 3.0, 1.2, 1)
-        self.i_v_cen = InputGroup("V벨트 중심거리", "m", 0.1, 3.0, 0.5, 2)
-        self.i_v_sec = ComboGroup("V벨트 단면",    ["auto", "A", "B", "C", "D"])
-        for w in [self.i_r_sf, self.i_v_cen, self.i_v_sec]:
+        self.i_r_brand  = ComboGroup("감속기 브랜드",   REDUCER_BRANDS, "효성")
+        self.i_r_sf     = InputGroup("서비스계수",      "",     1.0, 3.0, 1.2, 1)
+        self.i_c_type   = ComboGroup("체인 종류",       ["RS", "RF"], "RS")
+        self.i_c_teeth  = InputGroup("소 스프로켓 잇수","T",    9, 40, 19, 0)
+        self.i_c_center = InputGroup("축간 거리",       "m",    0.1, 5.0, 0.5, 2)
+        for w in [self.i_r_brand, self.i_r_sf, self.i_c_type, self.i_c_teeth, self.i_c_center]:
             l4.addRow(w)
         self._input_layout.addWidget(g4)
+        self.i_r_brand.currentTextChanged.connect(self._on_brand_changed)
+
+    def _on_brand_changed(self, brand: str):
+        is_direct = brand in DIRECT_COUPLING_BRANDS
+        for w in [self.i_c_type, self.i_c_teeth, self.i_c_center]:
+            w.setEnabled(not is_direct)
 
     def collect_inputs(self):
         eq = BagFilterInput(
@@ -83,10 +92,11 @@ class BagFilterWidget(BaseEquipmentWidget):
             km_factor=self.i_s_km.value(),
             kt_factor=self.i_s_kt.value(),
         )
-        r = ReducerInput(service_factor=self.i_r_sf.value())
-        v = VBeltInput(center_distance_m=self.i_v_cen.value(),
-                       section=self.i_v_sec.current_text())
-        return eq, b, s, r, v
+        r = ReducerInput(service_factor=self.i_r_sf.value(), brand=self.i_r_brand.current_text())
+        c = ChainInput(chain_type=self.i_c_type.current_text(),
+                       num_teeth_small=int(self.i_c_teeth.value()),
+                       center_distance_m=self.i_c_center.value())
+        return eq, b, s, r, c
 
     def validate_inputs(self, inp) -> list:
         eq, *_ = inp
@@ -98,5 +108,5 @@ class BagFilterWidget(BaseEquipmentWidget):
         return errors
 
     def run_calculation(self, inp):
-        eq, b, s, r, v = inp
-        return calc_module.calculate(eq, b, s, r, v)
+        eq, b, s, r, c = inp
+        return calc_module.calculate(eq, b, s, r, c)

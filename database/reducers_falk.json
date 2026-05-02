@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0",
+  "manufacturer": "FALK (Rexnord)",
+  "series": "Ultradrive / Quadrive",
+  "note": "중공 샤프트 직결 — 체인 미사용",
+  "use_chain": false,
+  "reducers": [
+    {"model": "UD070-5",  "ratio": 5,  "rated_power_kW": 2.2,  "efficiency_pct": 95, "frame_size": "070"},
+    {"model": "UD070-10", "ratio": 10, "rated_power_kW": 1.5,  "efficiency_pct": 94, "frame_size": "070"},
+    {"model": "UD070-20", "ratio": 20, "rated_power_kW": 1.1,  "efficiency_pct": 94, "frame_size": "070"},
+    {"model": "UD070-30", "ratio": 30, "rated_power_kW": 0.75, "efficiency_pct": 93, "frame_size": "070"},
+    {"model": "UD070-50", "ratio": 50, "rated_power_kW": 0.55, "efficiency_pct": 93, "frame_size": "070"},
+    {"model": "UD110-5",  "ratio": 5,  "rated_power_kW": 7.5,  "efficiency_pct": 95, "frame_size": "110"},
+    {"model": "UD110-10", "ratio": 10, "rated_power_kW": 5.5,  "efficiency_pct": 95, "frame_size": "110"},
+    {"model": "UD110-20", "ratio": 20, "rated_power_kW": 4.0,  "efficiency_pct": 94, "frame_size": "110"},
+    {"model": "UD110-30", "ratio": 30, "rated_power_kW": 3.0,  "efficiency_pct": 93, "frame_size": "110"},
+    {"model": "UD110-50", "ratio": 50, "rated_power_kW": 2.2,  "efficiency_pct": 93, "frame_size": "110"},
+    {"model": "UD180-5",  "ratio": 5,  "rated_power_kW": 22.0, "efficiency_pct": 95, "frame_size": "180"},
+    {"model": "UD180-10", "ratio": 10, "rated_power_kW": 15.0, "efficiency_pct": 95, "frame_size": "180"},
+    {"model": "UD180-20", "ratio": 20, "rated_power_kW": 11.0, "efficiency_pct": 94, "frame_size": "180"},
+    {"model": "UD180-30", "ratio": 30, "rated_power_kW": 7.5,  "efficiency_pct": 93, "frame_size": "180"},
+    {"model": "UD180-50", "ratio": 50, "rated_power_kW": 5.5,  "efficiency_pct": 93, "frame_size": "180"},
+    {"model": "UD280-5",  "ratio": 5,  "rated_power_kW": 55.0, "efficiency_pct": 95, "frame_size": "280"},
+    {"model": "UD280-10", "ratio": 10, "rated_power_kW": 37.0, "efficiency_pct": 95, "frame_size": "280"},
+    {"model": "UD280-20", "ratio": 20, "rated_power_kW": 22.0, "efficiency_pct": 94, "frame_size": "280"},
+    {"model": "UD280-30", "ratio": 30, "rated_power_kW": 15.0, "efficiency_pct": 93, "frame_size": "280"},
+    {"model": "UD280-50", "ratio": 50, "rated_power_kW": 11.0, "efficiency_pct": 93, "frame_size": "280"}
+  ]
+}

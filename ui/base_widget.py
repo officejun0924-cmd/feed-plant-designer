@@ -79,7 +79,7 @@ class BaseEquipmentWidget(QWidget):
         self._card_motor = ResultCard("모터 선정 결과")
         self._card_shaft = ResultCard("샤프트 설계 결과")
         self._card_reducer = ResultCard("감속기 선정 결과")
-        self._card_vbelt = ResultCard("V벨트 선정 결과")
+        self._card_chain = ResultCard("체인 선정 결과")
         self._bearing_table = BearingResultTable()
         self._notes = QTextEdit()
         self._notes.setObjectName("notes_area")
@@ -89,7 +89,7 @@ class BaseEquipmentWidget(QWidget):
 
         for w in [self._card_motor, self._bearing_table,
                   self._card_shaft, self._card_reducer,
-                  self._card_vbelt, self._notes]:
+                  self._card_chain, self._notes]:
             self._result_layout.addWidget(w)
         self._result_layout.addStretch()
 
@@ -180,15 +180,23 @@ class BaseEquipmentWidget(QWidget):
         self._card_reducer.set_row("출력 토크", f"{rd.output_torque_Nm:.1f}", "N·m")
         self._card_reducer.set_row("효율", f"{rd.efficiency_pct}", "%")
 
-        vb = r.vbelt
-        self._card_vbelt.set_row("벨트 단면", vb.section)
-        self._card_vbelt.set_row("벨트 호칭", vb.belt_length_designation)
-        self._card_vbelt.set_row("벨트 길이", f"{vb.belt_length_mm:.0f}", "mm")
-        self._card_vbelt.set_row("벨트 수량", f"{vb.number_of_belts}", "개")
-        self._card_vbelt.set_row("구동 풀리 직경", f"{vb.drive_pulley_dia_mm:.0f}", "mm")
-        self._card_vbelt.set_row("피동 풀리 직경", f"{vb.driven_pulley_dia_mm:.0f}", "mm")
-        self._card_vbelt.set_row("실제 감속비", f"{vb.actual_ratio:.3f}")
-        self._card_vbelt.set_row("접촉각", f"{vb.contact_angle_deg:.1f}", "°")
+        ch = r.chain
+        self._card_chain.clear_rows()
+        if ch.chain_designation == "직결":
+            self._card_chain.set_row("구동 방식", "직결 구동 (체인 없음)")
+        elif ch.chain_designation:
+            self._card_chain.set_row("체인 종류", ch.chain_type)
+            self._card_chain.set_row("체인 호칭", ch.chain_designation)
+            self._card_chain.set_row("피치", f"{ch.chain_pitch_mm:.3f}", "mm")
+            self._card_chain.set_row("구동 스프로켓",
+                                     f"Z={ch.drive_sprocket_teeth}  ⌀{ch.sprocket_dia_drive_mm:.1f} mm")
+            self._card_chain.set_row("피동 스프로켓",
+                                     f"Z={ch.driven_sprocket_teeth}  ⌀{ch.sprocket_dia_driven_mm:.1f} mm")
+            self._card_chain.set_row("감속비", f"{ch.actual_ratio:.3f}")
+            self._card_chain.set_row("체인 속도", f"{ch.chain_speed_mpm:.1f}", "m/min")
+            self._card_chain.set_row("링크 수", f"{ch.chain_length_links}", "링크")
+        else:
+            self._card_chain.set_row("체인", "—")
 
         notes = r.calculation_notes
         self._notes.setPlainText("\n".join(notes) if notes else "✓ 계산 완료 — 경고 없음")

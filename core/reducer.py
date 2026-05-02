@@ -1,7 +1,15 @@
 import math
-from models.input_models import ReducerInput, VBeltInput
-from models.result_models import ReducerResult, VBeltResult
-from app.config import VBELT_SECTIONS
+from models.input_models import ReducerInput, VBeltInput, ChainInput
+from models.result_models import ReducerResult, VBeltResult, ChainResult
+from app.config import RS_POWER_TABLE, RF_POWER_TABLE, CHAIN_PITCH, DIRECT_COUPLING_BRANDS
+
+# V벨트 단면별 최소 피치 직경 및 기준 동력 (KS B 1400)
+VBELT_SECTIONS = {
+    "A": {"pitch_dia_min_mm": 75,  "power_base_kW": 0.4},
+    "B": {"pitch_dia_min_mm": 125, "power_base_kW": 0.9},
+    "C": {"pitch_dia_min_mm": 200, "power_base_kW": 2.2},
+    "D": {"pitch_dia_min_mm": 355, "power_base_kW": 5.5},
+}
 
 
 class ReducerSelector:
@@ -9,7 +17,7 @@ class ReducerSelector:
 
     def select_reducer(self, inp: ReducerInput) -> ReducerResult:
         from database.db_loader import DBLoader
-        reducers = DBLoader.get_reducer_db()
+        reducers = DBLoader.get_reducer_by_brand(inp.brand)
 
         ratio = inp.input_speed_rpm / inp.output_speed_rpm
         design_power = inp.input_power_kW * inp.service_factor
@@ -141,4 +149,125 @@ class VBeltSelector:
             driven_pulley_dia_mm=d2,
             actual_ratio=round(actual_ratio, 3),
             contact_angle_deg=round(theta, 1),
+        )
+
+
+class ChainSelector:
+    """RS/RF 체인 선정 (KS B 1407)
+    Z1=19 소 스프로켓 기준 정격 동력 표 이용.
+    직결 구동(SEW/FALK)이면 ChainResult(chain_designation="직결") 반환.
+    """
+
+    def _nearest_rpm_key(self, table: dict, rpm: float) -> int:
+        keys = sorted(table.keys())
+        return min(keys, key=lambda k: abs(k - rpm))
+
+    def _sprocket_dia(self, pitch_mm: float, z: int) -> float:
+        """스프로켓 피치원 직경 d = p / sin(π/Z)"""
+        if z <= 0:
+            return 0.0
+        return pitch_mm / math.sin(math.pi / z)
+
+    def _chain_links(self, pitch_mm: float, z1: int, z2: int, C_mm: float) -> int:
+        """체인 링크 수 (짝수 올림)
+        L = 2*(C/p) + (Z1+Z2)/2 + (Z2-Z1)²/(4π²*(C/p))
+        """
+        cp = C_mm / pitch_mm
+        L = 2.0 * cp + (z1 + z2) / 2.0 + (z2 - z1) ** 2 / (4.0 * math.pi ** 2 * cp)
+        n = math.ceil(L)
+        return n if n % 2 == 0 else n + 1
+
+    def select_chain(self, inp: ChainInput, design_power_kW: float,
+                     reducer_brand: str, reducer_ratio: float) -> ChainResult:
+        """
+        Parameters
+        ----------
+        inp             : ChainInput (chain_type, num_teeth_small, center_distance_m)
+        design_power_kW : 모터 선정 동력 (kW)
+        reducer_brand   : "효성" | "SEW" | "FALK"
+        reducer_ratio   : 감속기 출력 단 실제 감속비 (체인 선정에는 사용 안 함, 추후 확장)
+        """
+        # 직결 구동 브랜드는 체인 없음
+        if reducer_brand in DIRECT_COUPLING_BRANDS:
+            return ChainResult(chain_type="직결", chain_designation="직결")
+
+        table = RS_POWER_TABLE if inp.chain_type == "RS" else RF_POWER_TABLE
+        prefix = inp.chain_type  # "RS" or "RF"
+
+        # 출력 회전수를 추산: 여기서는 소 스프로켓이 모터 출력단에 연결됨
+        # design_power_kW와 rpm이 주어지지 않으므로 임의 rpm(100rpm) 사용
+        # 실제 체인 선정 시 output_rpm이 필요하므로 기본값 100 사용
+        # (호출부에서 output_rpm을 전달하면 더 정확)
+        output_rpm = 100  # 기본값; select_chain_with_rpm 사용 권장
+
+        nearest_rpm = self._nearest_rpm_key(table, output_rpm)
+        row = table[nearest_rpm]
+
+        # design_power_kW 이상인 최소(가장 작은) 체인 선정
+        candidates = [(desig, kw) for desig, kw in row.items() if kw >= design_power_kW]
+        if not candidates:
+            # 최대 용량 체인 선정
+            desig = max(row, key=lambda d: row[d])
+        else:
+            desig = min(candidates, key=lambda x: x[1])[0]
+
+        pitch = CHAIN_PITCH.get(desig, 25.4)
+        z1 = inp.num_teeth_small
+        z2 = z1   # 감속비는 감속기가 담당; 체인은 1:1 (z1=z2)
+        C_mm = inp.center_distance_m * 1000.0
+        links = self._chain_links(pitch, z1, z2, C_mm)
+        d_drive = self._sprocket_dia(pitch, z1)
+        d_driven = self._sprocket_dia(pitch, z2)
+        speed_mpm = pitch * z1 * output_rpm / 60000.0
+
+        return ChainResult(
+            chain_type=inp.chain_type,
+            chain_designation=desig,
+            chain_pitch_mm=round(pitch, 3),
+            drive_sprocket_teeth=z1,
+            driven_sprocket_teeth=z2,
+            actual_ratio=round(z2 / z1, 3),
+            chain_speed_mpm=round(speed_mpm, 2),
+            chain_length_links=links,
+            sprocket_dia_drive_mm=round(d_drive, 1),
+            sprocket_dia_driven_mm=round(d_driven, 1),
+        )
+
+    def select_chain_with_rpm(self, inp: ChainInput, design_power_kW: float,
+                               reducer_brand: str, output_rpm: float) -> ChainResult:
+        """output_rpm 을 명시적으로 전달하는 버전 (권장)"""
+        if reducer_brand in DIRECT_COUPLING_BRANDS:
+            return ChainResult(chain_type="직결", chain_designation="직결")
+
+        table = RS_POWER_TABLE if inp.chain_type == "RS" else RF_POWER_TABLE
+
+        nearest_rpm = self._nearest_rpm_key(table, output_rpm)
+        row = table[nearest_rpm]
+
+        candidates = [(desig, kw) for desig, kw in row.items() if kw >= design_power_kW]
+        if not candidates:
+            desig = max(row, key=lambda d: row[d])
+        else:
+            desig = min(candidates, key=lambda x: x[1])[0]
+
+        pitch = CHAIN_PITCH.get(desig, 25.4)
+        z1 = inp.num_teeth_small
+        z2 = z1
+        C_mm = inp.center_distance_m * 1000.0
+        links = self._chain_links(pitch, z1, z2, C_mm)
+        d_drive = self._sprocket_dia(pitch, z1)
+        d_driven = self._sprocket_dia(pitch, z2)
+        speed_mpm = pitch * z1 * output_rpm / 60000.0
+
+        return ChainResult(
+            chain_type=inp.chain_type,
+            chain_designation=desig,
+            chain_pitch_mm=round(pitch, 3),
+            drive_sprocket_teeth=z1,
+            driven_sprocket_teeth=z2,
+            actual_ratio=1.0,
+            chain_speed_mpm=round(speed_mpm, 2),
+            chain_length_links=links,
+            sprocket_dia_drive_mm=round(d_drive, 1),
+            sprocket_dia_driven_mm=round(d_driven, 1),
         )

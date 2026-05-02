@@ -34,7 +34,8 @@ class MotorCalculator:
     def calc_mixer_power(self, inp: MixerPelletizerInput) -> float:
         """Newton 교반 동력 수: P = Np * rho * n^3 * D^5  [W → kW]"""
         n_rps = inp.shaft_speed_rpm / 60.0
-        P_W = inp.mixing_factor * inp.material_density * (n_rps ** 3) * (inp.mixer_diameter_m ** 5)
+        rho_kgm3 = inp.specific_gravity * 1000.0   # t/m³ → kg/m³
+        P_W = inp.mixing_factor * rho_kgm3 * (n_rps ** 3) * (inp.mixer_diameter_m ** 5)
         P_kW = P_W / (1000.0 * inp.drive_efficiency)
         return P_kW * inp.safety_factor
 

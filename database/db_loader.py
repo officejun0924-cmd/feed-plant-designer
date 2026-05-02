@@ -48,3 +48,20 @@ class DBLoader:
     @classmethod
     def get_reducer_db(cls) -> list:
         return cls._load("reducer_catalog.json")["reducers"]
+
+    @classmethod
+    def get_ucf_bearing_db(cls) -> list:
+        """UC 계열 삽입 베어링 + 하우징 유닛 (UCF/UCP/UCFC)"""
+        return cls._load("bearings_ucf.json")["units"]
+
+    @classmethod
+    def get_reducer_by_brand(cls, brand: str) -> list:
+        """브랜드별 감속기 DB 반환. 효성/SEW/FALK 지원"""
+        fname_map = {
+            "효성": "reducers_hyosung.json",
+            "SEW":  "reducers_sew.json",
+            "FALK": "reducers_falk.json",
+        }
+        fname = fname_map.get(brand, "reducer_catalog.json")
+        data = cls._load(fname)
+        return data.get("reducers", [])

@@ -5,12 +5,13 @@
   구동 모터: 경험식 기반 토크 추정
 """
 import math
-from models.input_models import RotaryValveInput, BearingInput, ShaftInput, ReducerInput, VBeltInput
+from models.input_models import RotaryValveInput, BearingInput, ShaftInput, ReducerInput, ChainInput
 from models.result_models import EquipmentResult
 from core.motor import MotorCalculator
 from core.bearing import BearingCalculator
 from core.shaft import ShaftDesigner
-from core.reducer import ReducerSelector, VBeltSelector
+from core.reducer import ReducerSelector, ChainSelector
+from app.config import DIRECT_COUPLING_BRANDS
 
 # 표11-1 Rotor 날개 지름별 최대 회전수 및 배출용량
 _ROTOR_DB = {
@@ -28,14 +29,14 @@ def calculate(inp: RotaryValveInput,
               bearing_inp: BearingInput,
               shaft_inp: ShaftInput,
               reducer_inp: ReducerInput,
-              vbelt_inp: VBeltInput) -> EquipmentResult:
+              chain_inp: ChainInput) -> EquipmentResult:
 
     notes = []
     motor_calc   = MotorCalculator()
     bearing_calc = BearingCalculator()
     shaft_des    = ShaftDesigner()
     reducer_sel  = ReducerSelector()
-    vbelt_sel    = VBeltSelector()
+    chain_sel    = ChainSelector()
 
     D_m = inp.rotor_diameter_mm / 1000.0
     d_m = inp.shaft_diameter_mm / 1000.0
@@ -93,17 +94,18 @@ def calculate(inp: RotaryValveInput,
         input_speed_rpm=motor_result.rated_rpm,
         output_speed_rpm=inp.rotation_speed_rpm,
         service_factor=reducer_inp.service_factor,
+        brand=reducer_inp.brand,
     )
     reducer_result = reducer_sel.select_reducer(r_adj)
 
-    vb_adj = VBeltInput(
+    chain_result = chain_sel.select_chain_with_rpm(
+        chain_inp,
         design_power_kW=motor_result.selected_motor_kW,
-        drive_speed_rpm=motor_result.rated_rpm,
-        driven_speed_rpm=inp.rotation_speed_rpm,
-        center_distance_m=vbelt_inp.center_distance_m,
-        section=vbelt_inp.section,
+        reducer_brand=reducer_inp.brand,
+        output_rpm=motor_result.rated_rpm / max(reducer_result.ratio, 1),
     )
-    vbelt_result = vbelt_sel.select_vbelt(vb_adj)
+    if reducer_inp.brand in DIRECT_COUPLING_BRANDS:
+        notes.append(f"ℹ {reducer_inp.brand} 감속기 — 직결 구동 (체인 없음)")
 
     return EquipmentResult(
         equipment_type="로터리 밸브",
@@ -112,6 +114,6 @@ def calculate(inp: RotaryValveInput,
         bearing_driven=bearing_driven,
         shaft=shaft_result,
         reducer=reducer_result,
-        vbelt=vbelt_result,
+        chain=chain_result,
         calculation_notes=notes,
     )

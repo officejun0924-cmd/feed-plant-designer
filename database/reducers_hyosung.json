@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0",
+  "manufacturer": "효성 (Hyosung)",
+  "series": "HGM / H-Series 헬리컬 감속기",
+  "note": "샤프트 출력형 — 체인 사용",
+  "use_chain": true,
+  "reducers": [
+    {"model": "H27-5",  "ratio": 5,  "rated_power_kW": 3.0,  "efficiency_pct": 96, "frame_size": "27"},
+    {"model": "H27-7",  "ratio": 7.5,"rated_power_kW": 2.2,  "efficiency_pct": 96, "frame_size": "27"},
+    {"model": "H27-10", "ratio": 10, "rated_power_kW": 2.2,  "efficiency_pct": 95, "frame_size": "27"},
+    {"model": "H27-14", "ratio": 14, "rated_power_kW": 1.5,  "efficiency_pct": 95, "frame_size": "27"},
+    {"model": "H27-20", "ratio": 20, "rated_power_kW": 1.5,  "efficiency_pct": 94, "frame_size": "27"},
+    {"model": "H27-28", "ratio": 28, "rated_power_kW": 1.1,  "efficiency_pct": 94, "frame_size": "27"},
+    {"model": "H27-40", "ratio": 40, "rated_power_kW": 0.75, "efficiency_pct": 93, "frame_size": "27"},
+    {"model": "H27-50", "ratio": 50, "rated_power_kW": 0.75, "efficiency_pct": 93, "frame_size": "27"},
+
+    {"model": "H37-5",  "ratio": 5,  "rated_power_kW": 5.5,  "efficiency_pct": 96, "frame_size": "37"},
+    {"model": "H37-7",  "ratio": 7.5,"rated_power_kW": 5.5,  "efficiency_pct": 96, "frame_size": "37"},
+    {"model": "H37-10", "ratio": 10, "rated_power_kW": 4.0,  "efficiency_pct": 95, "frame_size": "37"},
+    {"model": "H37-14", "ratio": 14, "rated_power_kW": 4.0,  "efficiency_pct": 95, "frame_size": "37"},
+    {"model": "H37-20", "ratio": 20, "rated_power_kW": 3.0,  "efficiency_pct": 94, "frame_size": "37"},
+    {"model": "H37-28", "ratio": 28, "rated_power_kW": 2.2,  "efficiency_pct": 94, "frame_size": "37"},
+    {"model": "H37-40", "ratio": 40, "rated_power_kW": 1.5,  "efficiency_pct": 93, "frame_size": "37"},
+    {"model": "H37-50", "ratio": 50, "rated_power_kW": 1.5,  "efficiency_pct": 93, "frame_size": "37"},
+
+    {"model": "H47-5",  "ratio": 5,  "rated_power_kW": 11.0, "efficiency_pct": 96, "frame_size": "47"},
+    {"model": "H47-7",  "ratio": 7.5,"rated_power_kW": 11.0, "efficiency_pct": 96, "frame_size": "47"},
+    {"model": "H47-10", "ratio": 10, "rated_power_kW": 7.5,  "efficiency_pct": 95, "frame_size": "47"},
+    {"model": "H47-14", "ratio": 14, "rated_power_kW": 7.5,  "efficiency_pct": 95, "frame_size": "47"},
+    {"model": "H47-20", "ratio": 20, "rated_power_kW": 5.5,  "efficiency_pct": 94, "frame_size": "47"},
+    {"model": "H47-28", "ratio": 28, "rated_power_kW": 4.0,  "efficiency_pct": 94, "frame_size": "47"},
+    {"model": "H47-40", "ratio": 40, "rated_power_kW": 3.0,  "efficiency_pct": 93, "frame_size": "47"},
+    {"model": "H47-50", "ratio": 50, "rated_power_kW": 3.0,  "efficiency_pct": 93, "frame_size": "47"},
+
+    {"model": "H57-5",  "ratio": 5,  "rated_power_kW": 22.0, "efficiency_pct": 96, "frame_size": "57"},
+    {"model": "H57-10", "ratio": 10, "rated_power_kW": 15.0, "efficiency_pct": 95, "frame_size": "57"},
+    {"model": "H57-20", "ratio": 20, "rated_power_kW": 11.0, "efficiency_pct": 94, "frame_size": "57"},
+    {"model": "H57-28", "ratio": 28, "rated_power_kW": 7.5,  "efficiency_pct": 94, "frame_size": "57"},
+    {"model": "H57-40", "ratio": 40, "rated_power_kW": 5.5,  "efficiency_pct": 93, "frame_size": "57"},
+    {"model": "H57-50", "ratio": 50, "rated_power_kW": 5.5,  "efficiency_pct": 93, "frame_size": "57"},
+
+    {"model": "H67-5",  "ratio": 5,  "rated_power_kW": 45.0, "efficiency_pct": 96, "frame_size": "67"},
+    {"model": "H67-10", "ratio": 10, "rated_power_kW": 30.0, "efficiency_pct": 95, "frame_size": "67"},
+    {"model": "H67-20", "ratio": 20, "rated_power_kW": 22.0, "efficiency_pct": 94, "frame_size": "67"},
+    {"model": "H67-30", "ratio": 30, "rated_power_kW": 15.0, "efficiency_pct": 94, "frame_size": "67"},
+    {"model": "H67-50", "ratio": 50, "rated_power_kW": 11.0, "efficiency_pct": 93, "frame_size": "67"},
+
+    {"model": "H77-5",  "ratio": 5,  "rated_power_kW": 90.0, "efficiency_pct": 96, "frame_size": "77"},
+    {"model": "H77-10", "ratio": 10, "rated_power_kW": 55.0, "efficiency_pct": 95, "frame_size": "77"},
+    {"model": "H77-20", "ratio": 20, "rated_power_kW": 37.0, "efficiency_pct": 94, "frame_size": "77"},
+    {"model": "H77-30", "ratio": 30, "rated_power_kW": 30.0, "efficiency_pct": 94, "frame_size": "77"},
+    {"model": "H77-50", "ratio": 50, "rated_power_kW": 22.0, "efficiency_pct": 93, "frame_size": "77"}
+  ]
+}
