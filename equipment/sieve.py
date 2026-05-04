@@ -1,8 +1,11 @@
 """Sieve(체) 설계 계산기
 핸드북 Chapter 14 경험식:
-  Q = (k·l·m·n·o·p) × ρ' × a × q
-  q: 진동체 1 m² 당 기준처리능력 (표14-1)
-  진동 모터: P ≈ 0.75 kW/m² × 체 면적 (실무 기준)
+  1) 기준 처리능력: q [m³/hr/m²] — 표14-1 체 구멍 크기 기준 (선형 보간)
+  2) 종합 수정계수: K = k × l × m × n × o × p
+  3) 설계 처리 능력: Q = K × ρ' × a × q  [T/hr]
+     a: 체 면적(m²), ρ': 외관상 비중(t/m³)
+  4) 필요 체 면적:  a_req = Qt / (K × ρ' × q)  [m²]
+  5) 진동 모터 동력: P ≈ 0.75 kW/m² × a × Sf / η
 """
 from models.input_models import SieveInput, BearingInput, ShaftInput, ReducerInput, ChainInput
 from models.result_models import EquipmentResult
@@ -12,7 +15,7 @@ from core.shaft import ShaftDesigner
 from core.reducer import ReducerSelector, ChainSelector
 from app.config import DIRECT_COUPLING_BRANDS
 
-# 표14-1: 체 구멍 크기 → 기준 처리능력 q (m³/hr/m²)
+# 표14-1: 체 구멍 크기(mm) → 기준 처리능력 q (m³/hr/m²)
 _Q_TABLE = [
     (0.16, 1.9), (0.2, 2.2), (0.3, 2.5), (0.4, 2.8), (0.6, 3.2),
     (0.8, 3.7), (1.17, 4.4), (2.0, 5.5), (3.15, 7.0), (5.0, 11.0),
@@ -49,39 +52,79 @@ def calculate(inp: SieveInput,
     reducer_sel  = ReducerSelector()
     chain_sel    = ChainSelector()
 
-    # ── Sieve 처리 능력 계산 ─────────────────────────────────
-    q_base = _lookup_q(inp.sieve_opening_mm)   # m³/hr/m²
+    Qt    = inp.capacity_tph
+    a     = inp.sieve_area_m2
+    rho   = inp.material_density        # t/m³
+    eta   = inp.drive_efficiency
+    Sf    = inp.safety_factor
 
-    # 종합 수정계수
-    K_total = (inp.k_factor * inp.l_factor * inp.m_factor *
-               inp.n_factor * inp.o_factor * inp.p_factor)
+    # ── 1) 표14-1 기준 처리능력 조회 ─────────────────────────────────────────
+    q_base = _lookup_q(inp.sieve_opening_mm)
 
-    # 설계 처리량 (Ton/hr)
-    Q_design = K_total * inp.material_density * inp.sieve_area_m2 * q_base
+    notes.append("■ 1) 표14-1 기준 처리능력 조회")
+    notes.append(f"   체 구멍 크기 = {inp.sieve_opening_mm} mm")
+    notes.append(f"   기준 처리능력 q = {q_base:.2f}  m³/hr/m²  (선형 보간)")
 
-    notes.append(f"■ 체 구멍 {inp.sieve_opening_mm} mm → q = {q_base:.1f} m³/hr/m²")
-    notes.append(f"■ 종합 수정계수 K = {K_total:.3f}")
-    notes.append(f"■ 설계 처리 능력: {Q_design:.1f} Ton/hr")
-    notes.append(f"■ 목표 처리량: {inp.capacity_tph} Ton/hr")
+    # ── 2) 종합 수정계수 ─────────────────────────────────────────────────────
+    k = inp.k_factor
+    l = inp.l_factor
+    m = inp.m_factor
+    n = inp.n_factor
+    o = inp.o_factor
+    p = inp.p_factor
+    K_total = k * l * m * n * o * p
 
-    if Q_design < inp.capacity_tph:
-        shortage = inp.capacity_tph / Q_design
-        notes.append(f"⚠ 처리량 부족! 체 면적 ×{shortage:.2f} 배 확대 또는 2단 병렬 검토")
+    notes.append("■ 2) 종합 수정계수 K = k × l × m × n × o × p")
+    notes.append(f"   k(입도)={k:.2f} × l(형상)={l:.2f} × m(수분)={m:.2f}")
+    notes.append(f"   × n(밀도)={n:.2f} × o(부착)={o:.2f} × p(공급균일도)={p:.2f}")
+    notes.append(f"   K = {K_total:.3f}")
+
+    # ── 3) 설계 처리 능력 ──────────────────────────────────────────────────
+    Q_design = K_total * rho * a * q_base
+
+    notes.append("■ 3) 설계 처리 능력 Q")
+    notes.append(f"   Q = K × ρ' × a × q")
+    notes.append(f"     = {K_total:.3f} × {rho} × {a} × {q_base:.2f}")
+    notes.append(f"     = {Q_design:.2f}  T/hr")
+    notes.append(f"   목표 처리량 Qt = {Qt:.2f}  T/hr")
+
+    # ── 4) 필요 체 면적 역산 ────────────────────────────────────────────────
+    denom = K_total * rho * q_base
+    a_req = Qt / denom if denom > 0 else 0.0
+
+    notes.append("■ 4) 필요 체 면적 a_req")
+    notes.append(f"   a_req = Qt / (K × ρ' × q) = {Qt:.2f} / ({K_total:.3f} × {rho} × {q_base:.2f})")
+    notes.append(f"         = {a_req:.2f}  m²  (설계 체 면적: {a} m²)")
+
+    if Q_design < Qt:
+        shortage = Qt / Q_design
+        notes.append(f"   ⚠ 처리량 부족! 체 면적 ×{shortage:.2f} 배 확대 또는 2단 병렬 검토")
     else:
-        notes.append(f"✓ 체 면적 {inp.sieve_area_m2} m² — 처리량 여유율 "
-                     f"{(Q_design / inp.capacity_tph - 1) * 100:.0f}%")
+        notes.append(f"   ✓ 체 면적 {a} m² — 처리량 여유율 {(Q_design/Qt - 1)*100:.0f}%")
 
-    # 경사각 검토
     if inp.inclination_deg < 10 or inp.inclination_deg > 20:
-        notes.append(f"ℹ 경사각 {inp.inclination_deg}° — 일반 권장 10~20°")
+        notes.append(f"   ℹ 경사각 {inp.inclination_deg:.0f}° — 일반 권장 10~20°")
 
-    # ── 진동 모터 동력 ─────────────────────────────────────
-    P_kW = motor_calc.calc_sieve_power(inp)
-    motor_result = motor_calc.select_standard_motor(P_kW)
+    # ── 5) 진동 모터 동력 ─────────────────────────────────────────────────
+    P_kW_base = 0.75 * a / eta
+    P_req_kW  = P_kW_base * Sf
 
-    # 진동체 진동수 (통상 900~1500 rpm)
+    notes.append("■ 5) 진동 모터 동력")
+    notes.append(f"   P = 0.75 kW/m² × a / η = 0.75 × {a} / {eta}")
+    notes.append(f"     = {P_kW_base:.3f}  kW")
+    notes.append(f"   안전율 적용: {P_kW_base:.3f} × {Sf} = {P_req_kW:.3f}  kW")
+
+    # ── 모터 선정 ─────────────────────────────────────────────────────────
+    motor_result = motor_calc.select_standard_motor(P_req_kW)
+
     vib_rpm = 1000.0
 
+    # ── 비틀림 모멘트 ────────────────────────────────────────────────────────
+    T_Nm = 9550.0 * motor_result.selected_motor_kW / max(vib_rpm, 1)
+    notes.append(f"■ 진동 회전수 = {vib_rpm:.0f} rpm")
+    notes.append(f"■ 비틀림 모멘트 T = 9550 × {motor_result.selected_motor_kW} / {vib_rpm:.0f} = {T_Nm:.1f}  N·m")
+
+    # ── 베어링 선정 ──────────────────────────────────────────────────────────
     b_adj = BearingInput(
         radial_load_N=bearing_inp.radial_load_N,
         axial_load_N=bearing_inp.axial_load_N,
@@ -93,7 +136,7 @@ def calculate(inp: SieveInput,
     bearing_drive  = bearing_calc.select_bearing(b_adj, min_bore_mm=motor_result.shaft_dia_mm)
     bearing_driven = bearing_calc.select_bearing(b_adj, min_bore_mm=motor_result.shaft_dia_mm)
 
-    T_Nm = 9550.0 * motor_result.selected_motor_kW / max(vib_rpm, 1)
+    # ── 샤프트 설계 ──────────────────────────────────────────────────────────
     s_adj = ShaftInput(
         torque_Nm=T_Nm,
         bending_moment_Nm=shaft_inp.bending_moment_Nm,
@@ -104,6 +147,7 @@ def calculate(inp: SieveInput,
     )
     shaft_result = shaft_des.design(s_adj)
 
+    # ── 감속기 선정 ──────────────────────────────────────────────────────────
     r_adj = ReducerInput(
         input_power_kW=motor_result.selected_motor_kW,
         input_speed_rpm=motor_result.rated_rpm,
@@ -113,6 +157,7 @@ def calculate(inp: SieveInput,
     )
     reducer_result = reducer_sel.select_reducer(r_adj)
 
+    # ── 체인 선정 ─────────────────────────────────────────────────────────────
     chain_result = chain_sel.select_chain_with_rpm(
         chain_inp,
         design_power_kW=motor_result.selected_motor_kW,

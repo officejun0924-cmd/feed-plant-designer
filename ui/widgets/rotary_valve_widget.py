@@ -11,20 +11,24 @@ class RotaryValveWidget(BaseEquipmentWidget):
     def build_input_panel(self):
         g1 = QGroupBox("로터리 밸브 사양")
         l1 = QFormLayout(g1)
-        self.i_rotor_d  = InputGroup("Rotor 날개 직경 D", "mm",    200, 500, 300, 0,
+        self.i_rotor_d  = InputGroup("Rotor 날개 직경 D",  "mm",    200, 500, 300, 0,
                                      "표준: 200/250/300/350/400/450/500 mm")
-        self.i_rotor_l  = InputGroup("Rotor 날개 길이 L", "m",     0.1, 1.0, 0.3, 2)
-        self.i_shaft_d  = InputGroup("Shaft 직경 d",      "mm",    30,  150, 60,  0)
-        self.i_rpm      = InputGroup("회전수 N",           "rpm",   10,  100, 30,  0,
+        self.i_rotor_l  = InputGroup("Rotor 유효 길이 L", "m",     0.1, 2.0, 0.388, 3)
+        self.i_shaft_d  = InputGroup("Shaft 직경 d",      "mm",    30,  150, 60,   0)
+        self.i_rpm      = InputGroup("회전수 N",           "rpm",   10,  100, 33.06, 2,
                                      "통상 25~40 rpm, 최대 40 rpm 권장")
-        self.i_density  = InputGroup("분립체 비중 γ",      "t/m³",  0.1, 2.0, 0.65, 2)
-        self.i_clearance= InputGroup("공극률 X (표11-2)",  "",      0.05, 0.35, 0.1, 2,
+        self.i_density  = InputGroup("분립체 비중 ρ",      "t/m³",  0.1, 2.0, 0.7,  2)
+        self.i_pockets  = InputGroup("포켓 개수 npocket",  "개",    4,   12,  6,    0)
+        self.i_pocket_a = InputGroup("포켓 단면적 Apocket","m²",    0.0, 1.0, 0.0,  6,
+                                     "0 입력 시 기하학으로 자동 계산")
+        self.i_clearance= InputGroup("공극률 X",           "",      0.05, 0.35, 0.1, 2,
                                      "사료=0.1, 대두=0.25, 옥수수=0.25")
-        self.i_vol_eta  = InputGroup("용적 효율 η",        "",      0.5, 1.0, 0.85, 2)
+        self.i_vol_eta  = InputGroup("충만 효율 η",        "",      0.5, 1.0, 0.8,  2)
         self.i_eta      = InputGroup("전동 효율",          "",      0.5, 1.0, 0.90, 2)
         self.i_sf       = InputGroup("안전계수",           "",      1.0, 3.0, 1.2,  2)
         for w in [self.i_rotor_d, self.i_rotor_l, self.i_shaft_d, self.i_rpm,
-                  self.i_density, self.i_clearance, self.i_vol_eta, self.i_eta, self.i_sf]:
+                  self.i_density, self.i_pockets, self.i_pocket_a,
+                  self.i_clearance, self.i_vol_eta, self.i_eta, self.i_sf]:
             l1.addRow(w)
         self._input_layout.addWidget(g1)
 
@@ -75,6 +79,8 @@ class RotaryValveWidget(BaseEquipmentWidget):
             shaft_diameter_mm=self.i_shaft_d.value(),
             rotation_speed_rpm=self.i_rpm.value(),
             material_density=self.i_density.value(),
+            num_pockets=int(self.i_pockets.value()),
+            pocket_area_m2=self.i_pocket_a.value(),
             clearance_ratio=self.i_clearance.value(),
             volumetric_efficiency=self.i_vol_eta.value(),
             drive_efficiency=self.i_eta.value(),

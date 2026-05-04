@@ -12,19 +12,21 @@ from app.config import IEC_MOTOR_SERIES
 class MotorCalculator:
 
     def calc_screw_conveyor_power(self, inp: ScrewConveyorInput) -> float:
-        """KS B 6852 / CEMA 공식
-        P_total = P_horizontal + P_vertical
-        P_h = (Q * L_h * f_m * f) / (367 * eta)
-        P_v = (Q * H) / (367 * eta)
+        """핸드북 공식 (참조 엑셀 준거):
+        H[HP] = (C × Qt × ℓ + Qt × h) / 270 × Sf
+        ※ C: 재료 상수(material_factor), h: 수직 높이(수평 시 최소 1m)
+        P[kW] = H[HP] × 0.7457 / η_drive
         """
         theta = math.radians(inp.inclination_deg)
-        L_h = inp.length_m * math.cos(theta)
-        H = inp.length_m * math.sin(theta)
-        eta = inp.drive_efficiency
+        H_vert = inp.length_m * math.sin(theta)      # 수직 높이 (m)
+        h_eff = max(1.0, H_vert)                      # 수평 시 최솟값 1
+        C = inp.material_factor                        # 재료 저항 상수
+        Qt = inp.capacity_tph
+        L = inp.length_m
 
-        P_h = (inp.capacity_tph * L_h * inp.material_factor * inp.friction_factor) / (367.0 * eta)
-        P_v = (inp.capacity_tph * H) / (367.0 * eta) if H > 0 else 0.0
-        return (P_h + P_v) * inp.safety_factor
+        H_HP = (C * Qt * L + Qt * h_eff) / 270.0
+        P_kW = H_HP * 0.7457 / inp.drive_efficiency
+        return P_kW * inp.safety_factor
 
     def calc_bucket_elevator_power(self, inp: BucketElevatorInput) -> float:
         """P [kW] = (Q * H) / (367 * eta)"""

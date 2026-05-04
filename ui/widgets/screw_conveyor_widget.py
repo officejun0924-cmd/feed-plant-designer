@@ -16,23 +16,27 @@ class ScrewConveyorWidget(BaseEquipmentWidget):
         l1 = QFormLayout(g1)
 
         material_keys = list(MATERIAL_DB.keys())
-        self.i_material      = ComboGroup("원재료",         material_keys, "직접 입력")
-        self.i_specific_grav = InputGroup("비중",           "t/m³",  0.1, 3.0,  0.65, 3)
-        self.i_friction      = InputGroup("마찰계수 f",     "",      0.01, 0.9, 0.40, 3)
-        self.i_mat_factor    = InputGroup("재료 계수 Cf",   "",      0.5, 5.0,  1.4,  2)
-        self.i_capacity      = InputGroup("운반 용량",      "ton/hr", 0.1, 500, 20)
-        self.i_diameter      = InputGroup("스크류 직경",    "m",     0.1, 1.0,  0.3, 3)
-        self.i_pitch         = InputGroup("피치",           "m",     0.05, 1.0, 0.3, 3)
-        self.i_speed         = InputGroup("회전수",         "rpm",   10, 200,   50)
-        self.i_length        = InputGroup("이송 길이",      "m",     1, 100,    10)
-        self.i_inclination   = InputGroup("경사각",         "°",     0,  45,    0, 1)
-        self.i_fill          = InputGroup("충만효율 ψ",     "",      0.1, 1.0,  0.45, 2)
-        self.i_eta           = InputGroup("전동 효율 η",    "",      0.5, 1.0,  0.90, 2)
-        self.i_sf_eq         = InputGroup("안전계수",       "",      1.0, 3.0,  1.25, 2)
+        self.i_material      = ComboGroup("원재료",            material_keys, "직접 입력")
+        self.i_specific_grav = InputGroup("비중 γ",           "t/m³",  0.1, 3.0,  0.65, 3)
+        self.i_friction      = InputGroup("마찰계수 f",        "",      0.01, 0.9, 0.40, 3)
+        self.i_mat_factor    = InputGroup("재료 상수 C",       "",      0.5, 5.0,  1.2,  2,
+                                          "사료류 ≈ 1.2, 분체류 ≈ 1.5~4.0")
+        self.i_capacity      = InputGroup("운반 용량 Qt",      "ton/hr", 0.1, 500, 20)
+        self.i_diameter      = InputGroup("스크류 외경 D",     "m",     0.1, 1.0,  0.3, 3)
+        self.i_shaft_d       = InputGroup("샤프트 외경 d",     "m",     0.02, 0.5, 0.089, 3,
+                                          "스크류 축 외경 — 예: D×0.3 ≈ 0.09m")
+        self.i_pitch         = InputGroup("피치 P",            "m",     0.05, 1.0, 0.3, 3)
+        self.i_speed         = InputGroup("회전수 N",          "rpm",   10, 500,   100)
+        self.i_length        = InputGroup("이송 길이 ℓ",       "m",     1, 100,    6)
+        self.i_inclination   = InputGroup("경사각",            "°",     0,  45,    0, 1)
+        self.i_fill          = InputGroup("충만효율 Φ",        "",      0.1, 1.0,  0.45, 2)
+        self.i_eta           = InputGroup("전동 효율 η",       "",      0.5, 1.0,  0.90, 2)
+        self.i_sf_eq         = InputGroup("안전계수 Sf",       "",      1.0, 3.0,  1.1,  2)
 
         for w in [self.i_material, self.i_specific_grav, self.i_friction, self.i_mat_factor,
-                  self.i_capacity, self.i_diameter, self.i_pitch, self.i_speed,
-                  self.i_length, self.i_inclination, self.i_fill, self.i_eta, self.i_sf_eq]:
+                  self.i_capacity, self.i_diameter, self.i_shaft_d, self.i_pitch,
+                  self.i_speed, self.i_length, self.i_inclination,
+                  self.i_fill, self.i_eta, self.i_sf_eq]:
             l1.addRow(w)
         self._input_layout.addWidget(g1)
 
@@ -100,6 +104,7 @@ class ScrewConveyorWidget(BaseEquipmentWidget):
             specific_gravity=self.i_specific_grav.value(),
             material_name=self.i_material.current_text(),
             screw_diameter_m=self.i_diameter.value(),
+            shaft_outer_diameter_m=self.i_shaft_d.value(),
             screw_pitch_m=self.i_pitch.value(),
             screw_speed_rpm=self.i_speed.value(),
             length_m=self.i_length.value(),

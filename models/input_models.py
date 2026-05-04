@@ -13,18 +13,19 @@ class EquipmentType(Enum):
 @dataclass
 class ScrewConveyorInput:
     capacity_tph: float = 20.0
-    specific_gravity: float = 0.65        # 비중 (t/m³)
+    specific_gravity: float = 0.65        # 비중 γ (t/m³)
     material_name: str = "직접 입력"      # 원재료 이름 (MATERIAL_DB 키)
-    screw_diameter_m: float = 0.3         # m
-    screw_pitch_m: float = 0.3            # m
-    screw_speed_rpm: float = 50.0         # rpm
-    length_m: float = 10.0                # m
-    inclination_deg: float = 0.0          # °
-    material_factor: float = 1.4          # Cf (사료류 ≈ 1.2~1.8)
-    friction_factor: float = 0.05         # f
-    fill_efficiency: float = 0.45         # 충만효율 ψ
+    screw_diameter_m: float = 0.3         # 스크류 외경 D (m)
+    shaft_outer_diameter_m: float = 0.089 # 샤프트 외경 d (m)
+    screw_pitch_m: float = 0.3            # 피치 P (m)
+    screw_speed_rpm: float = 100.0        # 회전수 N (rpm)
+    length_m: float = 6.0                 # 이송 길이 ℓ (m)
+    inclination_deg: float = 0.0          # 경사각 (°)
+    material_factor: float = 1.2          # 재료 상수 C (사료류 ≈ 1.2)
+    friction_factor: float = 0.05         # 마찰계수 f (참고용)
+    fill_efficiency: float = 0.45         # 충만효율 Φ
     drive_efficiency: float = 0.90
-    safety_factor: float = 1.25
+    safety_factor: float = 1.1
 
 
 @dataclass
@@ -223,17 +224,19 @@ class CycloneInput:
 
 @dataclass
 class RotaryValveInput:
-    """Rotary Valve 배출 용량 계산 — 핸드북 11장 공식
-    Q = 60 × η × V × N × γ
-    V = 0.7 × W × (1-X) × N × 60 × γ  (제2식)
+    """Rotary Valve 배출 용량 계산 — 핸드북 11장 / 포켓 기반 공식
+    Qt = ρ × Apocket × L × npocket × N × 60 × η  [T/H]
+    Vrev = Vpocket × npocket = Apocket × L × npocket  [m³/rev]
     """
     rotor_diameter_mm: float = 300.0        # Rotor 날개 지름 D (mm)
-    rotor_length_m: float = 0.3             # Rotor 날개 길이 L (m)
+    rotor_length_m: float = 0.388           # Rotor 유효 길이 L (m)  ← 388mm
     shaft_diameter_mm: float = 60.0         # Shaft 직경 d (mm)
-    rotation_speed_rpm: float = 30.0        # 회전수 N (rpm) — 통상 25~40
-    material_density: float = 0.65          # 분립체 비중 γ (t/m³)
+    rotation_speed_rpm: float = 33.06       # 회전수 N (rpm) — 통상 25~40
+    material_density: float = 0.7           # 분립체 비중 ρ (t/m³)
+    num_pockets: int = 6                    # 포켓 개수 npocket
+    pocket_area_m2: float = 0.0             # 포켓 단면적 Apocket (m²) — 0이면 기하학 자동 계산
     clearance_ratio: float = 0.1            # 공극률 X (사료=0.1)
-    volumetric_efficiency: float = 0.85     # 용적 효율 η
+    volumetric_efficiency: float = 0.8      # 충만 효율 η
     drive_efficiency: float = 0.90
     safety_factor: float = 1.2
 
