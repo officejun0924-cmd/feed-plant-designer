@@ -26,6 +26,8 @@ class ScrewConveyorInput:
     fill_efficiency: float = 0.45         # 충만효율 Φ
     drive_efficiency: float = 0.90
     safety_factor: float = 1.1
+    user_motor_kW: float = 0.0            # 직접 선정 모터 kW (0=자동)
+    user_bearing_C_kN: float = 0.0        # 직접 선정 베어링 C (kN, 0=자동)
 
 
 @dataclass
@@ -159,17 +161,24 @@ class BeltConveyorInput:
 class FlowConveyorInput:
     """Flow Conveyor 소요동력 — 핸드북 3장(Chapter 3) 공식
     H [HP] = E × L × Qt / 367
+    이론 운반량: Qt_theory = 60 × A × V × γ × φ  [T/hr]
+    단면적: A = B × H_trough  [m²]
     """
     capacity_tph: float = 80.0              # 운반량 Qt (Ton/hr)
     conveyor_length_m: float = 15.0         # Conveyor 길이 L (m)
     inclination_deg: float = 0.0            # 경사각 (°)  0=수평
     height_m: float = 0.0                   # 수직 높이 H (m, 경사 시 입력)
     chain_speed_mpm: float = 28.0           # Chain 속도 V (m/min)
-    specific_gravity: float = 0.7            # 비중 γ (t/m³)
+    specific_gravity: float = 0.7           # 비중 γ (t/m³)
     fill_efficiency: float = 0.65           # 충만효율 φ
     E_constant: float = 3.9                 # 핸드북 표3-7 상수 (사료류 ≈3.9)
+    trough_width_m: float = 0.50            # 트로프 폭 B (m)
+    trough_height_m: float = 0.25           # 트로프 높이 H_trough (m)
+    shaft_diameter_mm: float = 70.0         # 샤프트 직경 (mm, 축경 검증용)
     drive_efficiency: float = 0.85
     safety_factor: float = 1.2
+    user_motor_kW: float = 0.0              # 직접 선정 모터 kW (0=자동)
+    user_bearing_C_kN: float = 0.0          # 직접 선정 베어링 C (kN, 0=자동)
 
 
 @dataclass
@@ -177,6 +186,8 @@ class DragConveyorInput:
     """Drag Conveyor 소요동력 — 핸드북 4장 공식
     수평: H = Qt × F × L × (1.2 + 0.3N) / (300 × E)
     경사: H = Qt × (1.2 + 0.3N) × (F×L + H) / (300 × E)
+    이론 운반량: Qt_theory = 60 × A × V × γ × φ  [T/hr]
+    단면적: A = B × H_trough  [m²]
     """
     capacity_tph: float = 50.0              # 운반량 Qt (Ton/hr)
     conveyor_length_m: float = 10.0         # 수평 길이 L (m)
@@ -184,8 +195,16 @@ class DragConveyorInput:
     num_outlets: int = 1                    # 배출구 수 N
     friction_factor_F: float = 0.55         # 마찰계수 F (표4-2)
     mechanical_efficiency: float = 0.85     # 기계효율 E
+    chain_speed_mpm: float = 15.0           # 체인 속도 V (m/min)
+    trough_width_m: float = 0.40            # 트로프 폭 B (m)
+    trough_height_m: float = 0.20           # 트로프 높이 H_trough (m)
+    fill_efficiency: float = 0.75           # 충만효율 φ
+    specific_gravity: float = 0.65          # 재료 비중 γ (t/m³)
+    shaft_diameter_mm: float = 60.0         # 샤프트 직경 (mm, 축경 검증용)
     drive_efficiency: float = 0.90
     safety_factor: float = 1.25
+    user_motor_kW: float = 0.0              # 직접 선정 모터 kW (0=자동 선정)
+    user_bearing_C_kN: float = 0.0          # 직접 선정 베어링 기본 동하중 C (kN, 0=자동)
 
 
 @dataclass

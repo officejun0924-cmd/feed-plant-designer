@@ -84,6 +84,17 @@ class ScrewConveyorWidget(BaseEquipmentWidget):
         # 브랜드 변경 → 체인 위젯 활성/비활성
         self.i_r_brand.currentTextChanged.connect(self._on_brand_changed)
 
+        # ── 직접 선정 검증 ────────────────────────────────────────────────
+        g5 = QGroupBox("직접 선정 검증 (0 입력 시 자동 선정만)")
+        l5 = QFormLayout(g5)
+        self.i_user_motor  = InputGroup("사용자 모터 용량", "kW", 0, 500,  0, 2,
+                                         "직접 선정 시 적정 여부 계산 결과에 표시")
+        self.i_user_bear_C = InputGroup("사용자 베어링 C값","kN", 0, 2000, 0, 1,
+                                         "기본 동하중 C (kN) 입력")
+        for w in [self.i_user_motor, self.i_user_bear_C]:
+            l5.addRow(w)
+        self._input_layout.addWidget(g5)
+
     def _on_material_changed(self, name: str):
         """원재료 선택 시 비중·마찰계수·재료계수 자동 입력"""
         data = MATERIAL_DB.get(name, {})
@@ -114,6 +125,8 @@ class ScrewConveyorWidget(BaseEquipmentWidget):
             fill_efficiency=self.i_fill.value(),
             drive_efficiency=self.i_eta.value(),
             safety_factor=self.i_sf_eq.value(),
+            user_motor_kW=self.i_user_motor.value(),
+            user_bearing_C_kN=self.i_user_bear_C.value(),
         )
         b = BearingInput(
             radial_load_N=self.i_b_radial.value(),

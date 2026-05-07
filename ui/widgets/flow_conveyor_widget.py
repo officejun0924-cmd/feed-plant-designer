@@ -9,23 +9,30 @@ import equipment.flow_conveyor as calc_module
 class FlowConveyorWidget(BaseEquipmentWidget):
 
     def build_input_panel(self):
+        # ── 장비 사양 ────────────────────────────────────────────────────────
         g1 = QGroupBox("장비 사양")
         l1 = QFormLayout(g1)
-        self.i_capacity  = InputGroup("처리량",              "ton/hr", 0.1,  500,  80)
-        self.i_length    = InputGroup("Conveyor 길이",       "m",      1,    200,  15)
-        self.i_incline   = InputGroup("경사각",              "°",      0,    90,   0, 1)
-        self.i_height    = InputGroup("수직 높이 (경사 시)", "m",      0,    50,   0)
-        self.i_chain_v   = InputGroup("Chain 속도",          "m/min",  5,    50,   28)
-        self.i_density   = InputGroup("재료 비중 γ",         "t/m³",   0.1,  3.0,  0.7, 2)
-        self.i_fill      = InputGroup("충만효율 φ",          "",       0.3,  0.9,  0.65, 2)
-        self.i_E         = InputGroup("상수 E (표3-7)",      "",       1.0,  10.0, 3.9, 1)
-        self.i_eta       = InputGroup("전동 효율 η",         "",       0.5,  1.0,  0.85, 2)
-        self.i_sf        = InputGroup("안전계수",            "",       1.0,  3.0,  1.2, 2)
+        self.i_capacity  = InputGroup("설계 운반량 Qt",        "ton/hr", 0.1,  500,  80)
+        self.i_length    = InputGroup("Conveyor 길이 L",       "m",      1,    200,  15)
+        self.i_incline   = InputGroup("경사각",                "°",      0,    90,   0, 1)
+        self.i_height    = InputGroup("수직 높이 (경사 시)",   "m",      0,    50,   0)
+        self.i_chain_v   = InputGroup("Chain 속도 V",          "m/min",  5,    50,   28)
+        self.i_trough_w  = InputGroup("트로프 폭 B",           "m",      0.1,  2.0,  0.50, 2)
+        self.i_trough_h  = InputGroup("트로프 높이 H",         "m",      0.05, 1.0,  0.25, 2)
+        self.i_fill      = InputGroup("충만효율 φ",            "",       0.3,  0.9,  0.65, 2)
+        self.i_density   = InputGroup("재료 비중 γ",           "t/m³",   0.1,  3.0,  0.7,  2)
+        self.i_E         = InputGroup("상수 E (표3-7)",        "",       1.0,  10.0, 3.9,  1)
+        self.i_shaft_d   = InputGroup("샤프트 직경",           "mm",     20,   300,  70,   0,
+                                       "축경 적정 여부 판단에 사용")
+        self.i_eta       = InputGroup("전동 효율 η",           "",       0.5,  1.0,  0.85, 2)
+        self.i_sf        = InputGroup("안전계수",              "",       1.0,  3.0,  1.2,  2)
         for w in [self.i_capacity, self.i_length, self.i_incline, self.i_height,
-                  self.i_chain_v, self.i_density, self.i_fill, self.i_E, self.i_eta, self.i_sf]:
+                  self.i_chain_v, self.i_trough_w, self.i_trough_h, self.i_fill,
+                  self.i_density, self.i_E, self.i_shaft_d, self.i_eta, self.i_sf]:
             l1.addRow(w)
         self._input_layout.addWidget(g1)
 
+        # ── 베어링 계산 조건 ───────────────────────────────────────────────
         g2 = QGroupBox("베어링 계산 조건")
         l2 = QFormLayout(g2)
         self.i_b_radial = InputGroup("반경 하중 Fr", "N",   100, 500000, 6000)
@@ -38,28 +45,41 @@ class FlowConveyorWidget(BaseEquipmentWidget):
             l2.addRow(w)
         self._input_layout.addWidget(g2)
 
+        # ── 샤프트 설계 ───────────────────────────────────────────────────
         g3 = QGroupBox("샤프트 설계")
         l3 = QFormLayout(g3)
-        self.i_s_bend = InputGroup("굽힘 모멘트 M", "N·m", 0, 100000, 100)
+        self.i_s_bend = InputGroup("굽힘 모멘트 M",     "N·m", 0, 100000, 100)
         self.i_s_mat  = ComboGroup("재질", ["S45C", "SCM440", "SNC836"])
-        self.i_s_sf   = InputGroup("안전계수",       "",   1.0, 5.0, 2.0, 1)
-        self.i_s_km   = InputGroup("굽힘 충격계수 Km","",  1.0, 3.0, 1.5, 1)
-        self.i_s_kt   = InputGroup("비틀림 충격계수 Kt","", 1.0, 3.0, 1.0, 1)
+        self.i_s_sf   = InputGroup("안전계수",           "",   1.0, 5.0, 2.0, 1)
+        self.i_s_km   = InputGroup("굽힘 충격계수 Km",  "",   1.0, 3.0, 1.5, 1)
+        self.i_s_kt   = InputGroup("비틀림 충격계수 Kt","",   1.0, 3.0, 1.0, 1)
         for w in [self.i_s_bend, self.i_s_mat, self.i_s_sf, self.i_s_km, self.i_s_kt]:
             l3.addRow(w)
         self._input_layout.addWidget(g3)
 
+        # ── 감속기 / 체인 ─────────────────────────────────────────────────
         g4 = QGroupBox("감속기 / 체인")
         l4 = QFormLayout(g4)
         self.i_r_brand  = ComboGroup("감속기 브랜드",   REDUCER_BRANDS, "효성")
         self.i_r_sf     = InputGroup("서비스계수",      "",     1.0, 3.0, 1.5, 1)
-        self.i_c_type   = ComboGroup("체인 종류",       ["RS", "RF"], "RS")
+        self.i_c_type   = ComboGroup("체인 종류",       ["RF", "RS"], "RF")
         self.i_c_teeth  = InputGroup("소 스프로켓 잇수","T",    9, 40, 19, 0)
         self.i_c_center = InputGroup("축간 거리",       "m",    0.1, 5.0, 0.5, 2)
         for w in [self.i_r_brand, self.i_r_sf, self.i_c_type, self.i_c_teeth, self.i_c_center]:
             l4.addRow(w)
         self._input_layout.addWidget(g4)
         self.i_r_brand.currentTextChanged.connect(self._on_brand_changed)
+
+        # ── 직접 선정 검증 ────────────────────────────────────────────────
+        g5 = QGroupBox("직접 선정 검증 (0 입력 시 자동 선정만)")
+        l5 = QFormLayout(g5)
+        self.i_user_motor  = InputGroup("사용자 모터 용량", "kW", 0, 500,  0, 2,
+                                         "직접 선정 시 적정 여부 계산 결과에 표시")
+        self.i_user_bear_C = InputGroup("사용자 베어링 C값","kN", 0, 2000, 0, 1,
+                                         "기본 동하중 C (kN) 입력")
+        for w in [self.i_user_motor, self.i_user_bear_C]:
+            l5.addRow(w)
+        self._input_layout.addWidget(g5)
 
     def _on_brand_changed(self, brand: str):
         is_direct = brand in DIRECT_COUPLING_BRANDS
@@ -73,16 +93,21 @@ class FlowConveyorWidget(BaseEquipmentWidget):
             inclination_deg=self.i_incline.value(),
             height_m=self.i_height.value(),
             chain_speed_mpm=self.i_chain_v.value(),
-            specific_gravity=self.i_density.value(),
+            trough_width_m=self.i_trough_w.value(),
+            trough_height_m=self.i_trough_h.value(),
             fill_efficiency=self.i_fill.value(),
+            specific_gravity=self.i_density.value(),
             E_constant=self.i_E.value(),
+            shaft_diameter_mm=self.i_shaft_d.value(),
             drive_efficiency=self.i_eta.value(),
             safety_factor=self.i_sf.value(),
+            user_motor_kW=self.i_user_motor.value(),
+            user_bearing_C_kN=self.i_user_bear_C.value(),
         )
         b = BearingInput(
             radial_load_N=self.i_b_radial.value(),
             axial_load_N=self.i_b_axial.value(),
-            shaft_speed_rpm=23,
+            shaft_speed_rpm=23,   # 임시; 계산 중 sprocket_rpm으로 대체됨
             desired_life_hr=self.i_b_life.value(),
             bearing_type=self.i_b_type.current_text(),
             reliability=float(self.i_b_rel.current_text()),
@@ -106,6 +131,8 @@ class FlowConveyorWidget(BaseEquipmentWidget):
         errors = []
         if eq.capacity_tph <= 0:
             errors.append("처리량은 0 초과이어야 합니다.")
+        if eq.trough_width_m <= 0 or eq.trough_height_m <= 0:
+            errors.append("트로프 폭/높이는 0 초과이어야 합니다.")
         return errors
 
     def run_calculation(self, inp):

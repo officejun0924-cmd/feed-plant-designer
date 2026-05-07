@@ -160,6 +160,42 @@ def calculate(inp: ScrewConveyorInput,
     if reducer_inp.brand in DIRECT_COUPLING_BRANDS:
         notes.append(f"ℹ {reducer_inp.brand} 감속기 — 직결 구동 (체인 없음)")
 
+    # ── 6) 동력 적정 여부 ────────────────────────────────────────────────────
+    notes.append("■ 6) 동력 적정 여부")
+    notes.append(f"   필요 동력: {P_req_kW:.3f}  kW")
+    notes.append(f"   선정 모터: {motor_result.selected_motor_kW}  kW  ({motor_result.motor_model})")
+    if motor_result.selected_motor_kW >= P_req_kW:
+        margin = (motor_result.selected_motor_kW / P_req_kW - 1) * 100
+        notes.append(f"   ✓ 모터 용량 적정  (여유율 {margin:.0f}%)")
+    else:
+        notes.append(f"   ⚠ 모터 용량 부족!")
+
+    # ── 7) 축경 적정 여부 ────────────────────────────────────────────────────
+    d_input_mm = d * 1000.0
+    notes.append("■ 7) 축경 적정 여부")
+    notes.append(f"   계산 최소 축경:  {shaft_result.required_diameter_mm:.1f}  mm")
+    notes.append(f"   KS 표준 선정:    {shaft_result.selected_diameter_mm:.0f}  mm")
+    notes.append(f"   입력 샤프트 d:   {d_input_mm:.0f}  mm")
+    if d_input_mm >= shaft_result.required_diameter_mm:
+        notes.append(f"   ✓ 축경 적정  (여유 {d_input_mm - shaft_result.required_diameter_mm:.1f} mm)")
+    else:
+        notes.append(f"   ⚠ 축경 부족!  최소 {shaft_result.required_diameter_mm:.0f} mm 이상 필요")
+
+    # ── 8) 직접 선정 검증 ────────────────────────────────────────────────────
+    if inp.user_motor_kW > 0 or inp.user_bearing_C_kN > 0:
+        notes.append("■ 8) 직접 선정 검증")
+        if inp.user_motor_kW > 0:
+            if inp.user_motor_kW >= P_req_kW:
+                notes.append(f"   모터: 지정 {inp.user_motor_kW} kW  ≥  필요 {P_req_kW:.3f} kW  → ✓ 적정")
+            else:
+                notes.append(f"   모터: 지정 {inp.user_motor_kW} kW  <  필요 {P_req_kW:.3f} kW  → ⚠ 용량 부족!")
+        if inp.user_bearing_C_kN > 0:
+            C_req_kN = bearing_drive.required_C_N / 1000.0
+            if inp.user_bearing_C_kN >= C_req_kN:
+                notes.append(f"   베어링: 지정 C = {inp.user_bearing_C_kN} kN  ≥  필요 {C_req_kN:.1f} kN  → ✓ 적정")
+            else:
+                notes.append(f"   베어링: 지정 C = {inp.user_bearing_C_kN} kN  <  필요 {C_req_kN:.1f} kN  → ⚠ 수명 부족!")
+
     return EquipmentResult(
         equipment_type="스크류 컨베이어",
         motor=motor_result,
