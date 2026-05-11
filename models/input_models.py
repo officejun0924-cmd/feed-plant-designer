@@ -88,6 +88,9 @@ class BearingInput:
     bearing_type: str = "deep_groove_ball"   # deep_groove_ball | spherical_roller | cylindrical_roller
     temperature_factor: float = 1.0
     reliability: float = 90.0               # % → ISO 281 a1
+    # 사용자 선택 필드 (UI에서 브랜드+번호로 지정)
+    bearing_brand: str = "SKF"              # SKF | NSK | FAG | UCF | UCP | UCFC
+    bearing_number: str = ""               # 선택한 베어링 번호 (빈 문자열=자동 선정)
 
 
 @dataclass
@@ -98,6 +101,8 @@ class ShaftInput:
     safety_factor: float = 2.0
     km_factor: float = 1.5                   # 굽힘 충격계수 (점진=1.5, 갑작=2.0)
     kt_factor: float = 1.0                   # 비틀림 충격계수 (점진=1.0, 갑작=1.5)
+    # 사용자 입력 축경 (검증용)
+    user_diameter_mm: float = 0.0           # 0 = 자동 계산만
 
 
 @dataclass
@@ -107,6 +112,7 @@ class ReducerInput:
     output_speed_rpm: float = 50.0
     service_factor: float = 1.5
     brand: str = "효성"                   # 효성 | SEW | FALK
+    user_ratio: float = 0.0              # 0 = 자동 선정, >0 = 사용자 직접 지정
 
 
 @dataclass
@@ -123,6 +129,7 @@ class ChainInput:
     """RS/RF 체인 선정 입력 (KS B 1407)"""
     chain_type: str = "RS"                   # "RS" | "RF"
     num_teeth_small: int = 19                # 소 스프로켓 잇수 Z1
+    num_teeth_large: int = 38                # 대 스프로켓 잇수 Z2
     center_distance_m: float = 0.5           # 축간 거리 (m)
 
 

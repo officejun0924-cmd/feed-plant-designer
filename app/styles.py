@@ -202,4 +202,60 @@ QToolBar {
     padding: 4px;
     border-bottom: 1px solid #45475a;
 }
+
+/* ── 홈 화면 ── */
+QLabel#home_title {
+    color: #89b4fa;
+    font-size: 22pt;
+    font-weight: bold;
+}
+
+QLabel#home_subtitle {
+    color: #a6adc8;
+    font-size: 11pt;
+}
+
+QPushButton#home_btn {
+    background-color: #313244;
+    color: #cdd6f4;
+    border: 2px solid #45475a;
+    border-radius: 12px;
+    padding: 16px 32px;
+    font-size: 14pt;
+    font-weight: bold;
+}
+
+QPushButton#home_btn:hover {
+    background-color: #45475a;
+    border-color: #89b4fa;
+    color: #89b4fa;
+}
+
+QPushButton#home_btn:pressed {
+    background-color: #89b4fa;
+    color: #1e1e2e;
+}
+
+/* ── 장비 선택 화면 카드 ── */
+QPushButton#equip_card_btn {
+    background-color: #25253a;
+    color: #cdd6f4;
+    border: 1px solid #45475a;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 10pt;
+    font-weight: normal;
+    text-align: left;
+}
+
+QPushButton#equip_card_btn:hover {
+    background-color: #313244;
+    border-color: #89b4fa;
+    color: #89b4fa;
+}
+
+QPushButton#equip_card_btn:pressed {
+    background-color: #89b4fa;
+    color: #1e1e2e;
+}
 """
