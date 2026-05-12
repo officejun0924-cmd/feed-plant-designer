@@ -1,15 +1,15 @@
 """베어링 브랜드 → 번호 연계 선택 위젯"""
 from PyQt6.QtWidgets import (
-    QWidget, QFormLayout, QComboBox, QLabel, QDoubleSpinBox,
+    QWidget, QFormLayout, QComboBox, QLabel,
 )
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtCore import Qt
 from database.db_loader import DBLoader
 
 BEARING_BRANDS = ["SKF", "NSK", "FAG", "UCF", "UCP", "UCFC"]
 
 
 class BearingSelectGroup(QWidget):
-    """브랜드 콤보 → 번호 콤보 연계 + 요구수명 입력"""
+    """브랜드 콤보 → 번호 콤보 연계 + 사양 표시"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -33,16 +33,6 @@ class BearingSelectGroup(QWidget):
         self._spec_label.setObjectName("result_label")
         self._spec_label.setWordWrap(True)
         layout.addRow("  사양", self._spec_label)
-
-        # 요구 수명
-        self._life_spin = QDoubleSpinBox()
-        self._life_spin.setRange(1000, 200000)
-        self._life_spin.setValue(25000)
-        self._life_spin.setSingleStep(1000)
-        self._life_spin.setDecimals(0)
-        self._life_spin.setSuffix("  hr")
-        self._life_spin.setMinimumWidth(165)
-        layout.addRow("  요구 수명", self._life_spin)
 
         # 초기 번호 목록 로드
         self._load_numbers("SKF")
@@ -83,7 +73,8 @@ class BearingSelectGroup(QWidget):
         return self._number_combo.currentText()
 
     def desired_life_hr(self) -> float:
-        return self._life_spin.value()
+        """고정 25,000 hr (UI 입력 제거됨)"""
+        return 25000.0
 
     def bearing_data(self) -> dict:
         return DBLoader.get_bearing_by_number(self.brand(), self.number())

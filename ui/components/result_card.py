@@ -64,6 +64,8 @@ class BearingResultTable(QGroupBox):
         self._table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         self._table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self._table.setAlternatingRowColors(True)
+        self._table.setMinimumHeight(len(self.ROWS) * 30 + 32)  # 행 높이 보장
+        self.setMinimumHeight(len(self.ROWS) * 30 + 72)
 
         for i, (label, _) in enumerate(self.ROWS):
             item = QTableWidgetItem(label)

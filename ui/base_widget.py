@@ -95,6 +95,7 @@ class BaseEquipmentWidget(QWidget):
         self._result_layout.setSpacing(10)
         self._result_layout.setContentsMargins(4, 4, 4, 4)
 
+        self._card_capacity = ResultCard("운반 용량")
         self._card_motor   = ResultCard("모터 선정 결과")
         self._card_shaft   = ResultCard("샤프트 설계 결과")
         self._card_reducer = ResultCard("감속기 선정 결과")
@@ -106,9 +107,10 @@ class BaseEquipmentWidget(QWidget):
         self._notes.setMinimumHeight(160)
         self._notes.setPlaceholderText("계산 노트 및 경고")
 
-        for w in [self._card_motor, self._bearing_table, self._card_shaft,
-                  self._card_reducer, self._card_chain, self._notes]:
+        for w in [self._card_capacity, self._card_motor, self._bearing_table,
+                  self._card_shaft, self._card_reducer, self._card_chain, self._notes]:
             self._result_layout.addWidget(w)
+        self._card_capacity.setVisible(False)   # 용량 없는 장비는 숨김
         self._result_layout.addStretch()
 
         result_scroll.setWidget(result_container)
@@ -219,6 +221,7 @@ class BaseEquipmentWidget(QWidget):
             num_teeth_small=self._chain_group.z1(),
             num_teeth_large=self._chain_group.z2(),
             center_distance_m=0.5,
+            user_designation=self._chain_group.designation(),
         )
 
     def collect_inputs(self):
@@ -265,6 +268,14 @@ class BaseEquipmentWidget(QWidget):
 
     # ── 결과 표시 ──────────────────────────────────────────────────────────
     def update_results(self, r: EquipmentResult):
+        # ── 운반 용량 카드 (capacity_tph > 0 인 장비만 표시) ──────────────
+        if r.capacity_tph > 0:
+            self._card_capacity.setVisible(True)
+            self._card_capacity.clear_rows()
+            self._card_capacity.set_row("이론 운반 용량", f"{r.capacity_tph:.3f}", "T/hr")
+        else:
+            self._card_capacity.setVisible(False)
+
         m = r.motor
         self._card_motor.clear_rows()
         self._card_motor.set_row("필요 동력",       f"{m.required_power_kW:.3f}", "kW")

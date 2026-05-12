@@ -85,4 +85,5 @@ class EquipmentResult:
     reducer: ReducerResult = field(default_factory=ReducerResult)
     chain: ChainResult = field(default_factory=ChainResult)
     vbelt: VBeltResult = field(default_factory=VBeltResult)   # 하위 호환 유지
+    capacity_tph: float = 0.0                                  # 이론 운반 용량 (T/hr)
     calculation_notes: list = field(default_factory=list)

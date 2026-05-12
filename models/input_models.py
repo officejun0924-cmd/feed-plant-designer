@@ -131,6 +131,7 @@ class ChainInput:
     num_teeth_small: int = 19                # 소 스프로켓 잇수 Z1
     num_teeth_large: int = 38                # 대 스프로켓 잇수 Z2
     center_distance_m: float = 0.5           # 축간 거리 (m)
+    user_designation: str = ""               # 사용자 선택 호칭 (e.g. "RS-60"), ""=자동
 
 
 # ── 추가 장비 (2026.05 핸드북 기반) ──────────────────────────────────────

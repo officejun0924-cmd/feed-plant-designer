@@ -81,6 +81,7 @@ class MainWindow(QMainWindow):
         # 2. 계산식 선택 화면
         self._formula = FormulaScreen()
         self._formula.back_clicked.connect(self._show_home)
+        self._formula.equipment_selected.connect(self._open_equipment)
         self._stack.addWidget(self._formula)          # idx 2
 
         # 3. 장비 계산 화면 (플레이스홀더 — 실제 위젯은 동적 교체)

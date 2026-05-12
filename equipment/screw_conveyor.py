@@ -204,5 +204,6 @@ def calculate(inp: ScrewConveyorInput,
         shaft=shaft_result,
         reducer=reducer_result,
         chain=chain_result,
+        capacity_tph=Qt_calc,
         calculation_notes=notes,
     )

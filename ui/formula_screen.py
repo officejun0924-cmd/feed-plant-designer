@@ -6,6 +6,22 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QFont
 
+# 공식 이름 → 장비 키 매핑 (main_window EQUIPMENT_MAP 키와 동일해야 함)
+FORMULA_TO_EQUIP_KEY = {
+    "스크류 컨베이어 (Ch.KS B 6852)":        "screw",
+    "버킷 엘리베이터":                        "bucket",
+    "벨트 컨베이어 (핸드북 Ch.1 표1-9/1-10)": "belt",
+    "플로우 컨베이어 (핸드북 Ch.3)":           "flow",
+    "드래그 컨베이어 (핸드북 Ch.4 표4-2)":     "drag",
+    "믹서 / 펠레타이저 (Newton 교반)":         "mixer",
+    "분쇄기 / 해머밀 (Bond 분쇄 법칙)":        "grinder",
+    "팬 / 블로어":                            "fan",
+    "백 필터 (핸드북 Ch.8/9)":                "bag_filter",
+    "사이클론 (핸드북 Ch.10 표10-2)":          "cyclone",
+    "로타리밸브 (핸드북 Ch.11 표11-1)":        "rotary_valve",
+    "시브 — 체 (핸드북 Ch.14 표14-1)":         "sieve",
+}
+
 FORMULAS = {
     "스크류 컨베이어 (Ch.KS B 6852)": """
 ■ 운반 용량
@@ -211,6 +227,7 @@ FORMULAS = {
 
 class FormulaScreen(QWidget):
     back_clicked = pyqtSignal()
+    equipment_selected = pyqtSignal(str)   # 장비 키 (EQUIPMENT_MAP 키)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -232,11 +249,15 @@ class FormulaScreen(QWidget):
         title.setFont(f)
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
+        self._btn_go = QPushButton("▶  이 장비 계산하러 가기")
+        self._btn_go.setFixedWidth(220)
+        self._btn_go.clicked.connect(self._go_to_equipment)
+
         header.addWidget(btn_back)
         header.addStretch()
         header.addWidget(title)
         header.addStretch()
-        header.addSpacing(110)
+        header.addWidget(self._btn_go)
         layout.addLayout(header)
 
         # 스플리터: 왼쪽 목록 / 오른쪽 공식
@@ -246,6 +267,7 @@ class FormulaScreen(QWidget):
         self._list.addItems(list(FORMULAS.keys()))
         self._list.setMaximumWidth(280)
         self._list.currentTextChanged.connect(self._show_formula)
+        self._list.doubleClicked.connect(self._go_to_equipment)  # 더블클릭도 지원
 
         self._text = QTextEdit()
         self._text.setReadOnly(True)
@@ -266,3 +288,14 @@ class FormulaScreen(QWidget):
     def _show_formula(self, text: str):
         content = FORMULAS.get(text, "")
         self._text.setPlainText(content.strip())
+        # 해당 장비가 있으면 버튼 활성화
+        key = FORMULA_TO_EQUIP_KEY.get(text, "")
+        self._btn_go.setEnabled(bool(key))
+
+    def _go_to_equipment(self):
+        current_text = self._list.currentItem()
+        if current_text is None:
+            return
+        key = FORMULA_TO_EQUIP_KEY.get(current_text.text(), "")
+        if key:
+            self.equipment_selected.emit(key)

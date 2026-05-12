@@ -206,5 +206,6 @@ def calculate(inp: DragConveyorInput,
         shaft=shaft_result,
         reducer=reducer_result,
         chain=chain_result,
+        capacity_tph=Qt_theory,
         calculation_notes=notes,
     )

@@ -74,7 +74,10 @@ class DBLoader:
             result = []
             for u in units:
                 for ht in u.get("housing_types", []):
-                    if ht.startswith(brand):
+                    # 정확 접두사 매칭: UCF는 UCF204만, UCFC204 제외
+                    if ht.startswith(brand) and (
+                        len(ht) == len(brand) or ht[len(brand)].isdigit()
+                    ):
                         result.append(ht)
             return result
         else:
